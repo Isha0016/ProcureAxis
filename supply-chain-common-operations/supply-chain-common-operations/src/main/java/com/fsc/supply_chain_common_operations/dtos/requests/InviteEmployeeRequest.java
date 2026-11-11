@@ -47,4 +47,6 @@ public class InviteEmployeeRequest {
     private String phoneNumber;
 
     private List<UUID> roleSysIds;
+
+    private String officeLocation;
 }

@@ -11,7 +11,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
+import java.util.List;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.io.IOException;
 
 @Component
@@ -46,7 +47,18 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // If token is valid then only we are going to arrive at this line and we will create usernamepassword authentication
 
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(claims, null, null );
+        List<String> roles = claims.get("roles", List.class);
+
+        List<SimpleGrantedAuthority> authorities = roles.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                .toList();
+
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(
+                        claims,
+                        null,
+                        authorities
+                );
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
         // If we are calling doFilter after setting up authentication then that means we are approving the request

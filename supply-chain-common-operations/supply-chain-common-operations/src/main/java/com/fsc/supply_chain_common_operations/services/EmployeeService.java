@@ -13,6 +13,8 @@ import com.fsc.supply_chain_common_operations.utilities.SystemUtility;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.fsc.supply_chain_common_operations.repositories.NotificationContextRepo;
+import com.fsc.supply_chain_common_operations.repositories.CompanyRepo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,16 +30,21 @@ public class EmployeeService implements EntityService<Employee> {
 
     private RoleService roleService;
     private EmployeeRepo employeeRepo;
+    private CompanyRepo companyRepo;
     private CommonUtility commonUtility;
     private NotificationService notificationService;
+    @Autowired
+    private NotificationContextRepo notificationContextRepo;
 
     @Autowired
     public EmployeeService(RoleService roleService,
                            EmployeeRepo employeeRepo,
+                           CompanyRepo companyRepo,
                            CommonUtility commonUtility,
                            NotificationService notificationService){
         this.roleService = roleService;
         this.employeeRepo = employeeRepo;
+        this.companyRepo = companyRepo;
         this.commonUtility = commonUtility;
         this.notificationService = notificationService;
     }
@@ -51,6 +58,8 @@ public class EmployeeService implements EntityService<Employee> {
     }
 
     public Employee createMaintUserForCompany(Company company, CompanyType companyType) {
+        company.setCompanyType(companyType);
+        company = companyRepo.save(company);
 
         log.info("Starting main user creation. companyId={}, companyType={}",
                 company.getSysId(), companyType);
@@ -107,9 +116,11 @@ public class EmployeeService implements EntityService<Employee> {
           log.warn("Manager details not passed");
       }
       List<Role> roles = roleService.fetchRolesBySysId(inviteEmployeeRequest.getRoleSysIds());
-      Employee employee = EntityTransformer.mapEmpRequestToEmpModel(inviteEmployeeRequest, invitorEmp.getCompany(), invitorEmp, manager,roles);
+      String temporaryPassword = SystemUtility.generatePassword(10);
+      Employee employee = EntityTransformer.mapEmpRequestToEmpModel(inviteEmployeeRequest, invitorEmp.getCompany(), invitorEmp, manager,roles, temporaryPassword);
       employee = this.saveOrUpdate(employee);
         HashMap<String, String> emailMap = new HashMap<>();
+        emailMap.put("temporaryPassword", temporaryPassword);
 
 // User Details
         emailMap.put("maintUserName", employee.getFirstName());
@@ -158,9 +169,11 @@ public class EmployeeService implements EntityService<Employee> {
                 new HashMap<>(),
                 new HashMap<>()
         );
+        notificationContext = notificationContextRepo.save(notificationContext);
 
         NotificationTemplate notificationTemplate = notificationService.fetchTemplateById(NotificationTemplateConstant.COMPANY_REGISTRATION_TEMPLATE_ID);
         Notification inviteNotification = new Notification();
+        inviteNotification.setNotificationId(SystemUtility.generateId("NOTIFICATION"));
         inviteNotification.setBccUsers(List.of(invitorEmp));
         inviteNotification.setNotificationContext(notificationContext);
         inviteNotification.setEmail(true);

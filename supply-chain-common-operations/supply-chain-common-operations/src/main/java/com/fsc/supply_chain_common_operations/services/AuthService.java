@@ -8,6 +8,10 @@ import com.fsc.supply_chain_common_operations.models.Employee;
 import com.fsc.supply_chain_common_operations.models.Operation;
 import com.fsc.supply_chain_common_operations.models.Role;
 import com.fsc.supply_chain_common_operations.utilities.JwtUtility;
+import com.fsc.supply_chain_common_operations.enums.CompanyType;
+import com.fsc.supply_chain_common_operations.enums.CompanyStatus;
+import com.fsc.supply_chain_common_operations.enums.UserStatus;
+import com.fsc.supply_chain_common_operations.models.Company;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,21 +52,56 @@ public class AuthService {
     public Employee isUserHavingAccess(
             String userToken,
             String operationName
-    ){
+    ) {
         Claims claims = jwtUtility.extractAllClaims(userToken);
+
         String userEmail = claims.get("email", String.class);
+
         Employee employee = employeeService.getEmployeeByEmail(userEmail);
-        List<String> roleNames = claims.get("roles", List.class);
-        for(String roleName : roleNames){
-            // We will call roleService for getting the role object from role table.
-            Role role = roleService.fetchRoleByName(roleName);
-            // H.W. - You should have check that roleName should exist if it is not existing throw exceptioon
-            if(isRoleCanPerformOperation(role, operationName)){
+
+        if (employee == null) {
+            throw new UnAuthorizedException("Employee does not exist.");
+        }
+
+        // Check employee account status
+        if (employee.getUserStatus() != UserStatus.ACTIVE) {
+            throw new UnAuthorizedException("Employee account is not active.");
+        }
+
+        // Check company existence
+        Company company = employee.getCompany();
+
+        if (company == null) {
+            throw new UnAuthorizedException("Employee is not associated with a company.");
+        }
+
+        // Check company type
+        if (company.getCompanyType() != CompanyType.INTERNAL) {
+            throw new UnAuthorizedException(
+                    "Only internal employees can perform this operation."
+            );
+        }
+
+        // Check company status
+        if (company.getStatus() != CompanyStatus.ACTIVE) {
+            throw new UnAuthorizedException("Internal company is not active.");
+        }
+
+        // Check assigned role permissions
+        for (Role role : employee.getRoles()) {
+
+            if (role == null) {
+                continue;
+            }
+
+            if (isRoleCanPerformOperation(role, operationName)) {
                 return employee;
             }
-            // We need to check every role of the user and we will check is this role can perform the operation
         }
-        throw new UnAuthorizedException("User roles can not perform this operation.");
+
+        throw new UnAuthorizedException(
+                "User does not have permission to perform this operation."
+        );
     }
 
     private boolean isRoleCanPerformOperation(Role role, String operationName){

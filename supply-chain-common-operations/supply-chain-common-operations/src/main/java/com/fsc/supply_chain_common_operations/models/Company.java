@@ -1,6 +1,7 @@
 package com.fsc.supply_chain_common_operations.models;
 
 import com.fsc.supply_chain_common_operations.enums.CompanyStatus;
+import com.fsc.supply_chain_common_operations.enums.CompanyType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,4 +29,8 @@ public class Company extends GlobalRecord{
 
     @Enumerated(EnumType.STRING)
     private CompanyStatus status; // PENDING, REJECTED, INACTIVE, ACTIVE
+    @Enumerated(EnumType.STRING)
+    private CompanyType companyType;
+    @Column(columnDefinition = "TEXT")
+    private String rejectionReason;
 }

@@ -1,6 +1,7 @@
 package com.fsc.supply_chain_common_operations.utilities;
 
 import com.fsc.supply_chain_common_operations.constants.SystemConstant;
+import com.fsc.supply_chain_common_operations.models.Employee;
 import com.fsc.supply_chain_common_operations.models.Role;
 import com.fsc.supply_chain_common_operations.models.User;
 import io.jsonwebtoken.Claims;
@@ -21,21 +22,31 @@ public class JwtUtility {
 
     public final Key key = Keys.hmacShaKeyFor(SystemConstant.JWT_SECRET_PASSWORD.getBytes());
 
-    public String generateJwtToken(User user){
-        // Information which we want to encrypt inside the token.
-        String userEmail = user.getEmailAddress(); // CLAIM1
+    public String generateJwtToken(User user) {
 
-        List<String> roleNames = user.getRoles().stream().map(Role::getRoleName).toList(); // CLAIM2
+        String userEmail = user.getEmailAddress();
 
-        // Whatever userInformation we encrypt inside the token we call it as claims.
+        List<String> roleNames = user.getRoles()
+                .stream()
+                .map(Role::getRoleName)
+                .toList();
+
         HashMap<String, Object> claimsMap = new HashMap<>();
-        claimsMap.put("email" , userEmail);
-        claimsMap.put("roles", roleNames);
 
-        // Generating token
+        claimsMap.put("email", userEmail);
+        claimsMap.put("roles", roleNames);
+        claimsMap.put("userId", user.getSysId().toString());
+
+        if (user instanceof Employee employee && employee.getCompany() != null) {
+            claimsMap.put("companyId",
+                    employee.getCompany().getSysId().toString());
+        }
+
         return Jwts.builder()
                 .addClaims(claimsMap)
-                .setExpiration(new Date(System.currentTimeMillis() + SystemConstant.JWT_TOKEN_EXPIRATION_TIME_IN_MILLIS))
+                .setExpiration(new Date(
+                        System.currentTimeMillis()
+                                + SystemConstant.JWT_TOKEN_EXPIRATION_TIME_IN_MILLIS))
                 .setIssuedAt(new Date())
                 .signWith(key)
                 .compact();

@@ -37,6 +37,7 @@ public class Notification extends GlobalRecord{
     private boolean isSMSDelivered;
     private boolean isWhatsAppDelivered;
     private boolean isEmailDelivered;
+    @Column(columnDefinition = "TEXT")
     private String failureMessage;
     @OneToOne
     private NotificationContext notificationContext;

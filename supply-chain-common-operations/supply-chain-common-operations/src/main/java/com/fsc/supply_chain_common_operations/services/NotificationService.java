@@ -8,6 +8,10 @@ import com.fsc.supply_chain_common_operations.repositories.NotificationTemplateR
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.Optional;
+import org.hibernate.Hibernate;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,7 +32,20 @@ public class NotificationService {
         this.notificationTemplateRepo = notificationTemplateRepo;
         this.notificationRepo = notificationRepo;
     }
+    public Notification saveNotification(Notification notification) {
+        return notificationRepo.save(notification);
+    }
+    @Transactional
+    public Notification sendNotificationById(UUID notificationId) {
 
+        Notification notification = notificationRepo
+                .findNotificationWithDetails(notificationId)
+                .orElseThrow(() ->
+                        new RuntimeException("Notification not found: " + notificationId)
+                );
+
+        return sendNotification(notification);
+    }
     /**
      * Whenever any service wants to send the nottification they will call
      * this sendNotification function and this function needs just notification object.
@@ -71,9 +88,24 @@ public class NotificationService {
     }
 
 
-    public List<Notification> fetchNotificationByStatus(NotificationStatus notificationStatus){
-        // We need to call repository layer which will get us all the failed notifications.
-        return notificationRepo.findByNotificationStatus(notificationStatus);
+    @Transactional
+    public List<Notification> fetchNotificationByStatus(
+            NotificationStatus notificationStatus) {
+
+        List<Notification> notifications =
+                notificationRepo.findByNotificationStatus(notificationStatus);
+
+        for (Notification notification : notifications) {
+
+            Hibernate.initialize(notification.getToUsers());
+            Hibernate.initialize(notification.getCcUsers());
+            Hibernate.initialize(notification.getBccUsers());
+
+            Hibernate.initialize(notification.getNotificationTemplate());
+            Hibernate.initialize(notification.getNotificationContext());
+        }
+
+        return notifications;
     }
 
 

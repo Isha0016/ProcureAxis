@@ -54,12 +54,15 @@ public class EntityTransformer {
             Company company,
             Employee creator,
             Employee manager,
-            List<Role> roles
+            List<Role> roles,
+            String temporaryPassword
     ){
         return Employee.builder()
                 .employeeCode(SystemUtility.generateId("EMPLOYEE"))
                 .emailAddress(inviteEmployeeRequest.getEmailAddress())
                 .company(company)
+                .manager(manager)
+                .officeLocation(inviteEmployeeRequest.getOfficeLocation())
                 .department(inviteEmployeeRequest.getDepartment())
                 .designation(inviteEmployeeRequest.getDesignation())
                 .joiningDate(inviteEmployeeRequest.getJoiningDate())
@@ -72,11 +75,13 @@ public class EntityTransformer {
                 .emailAddress(inviteEmployeeRequest.getEmailAddress())
                 .phoneNumber(inviteEmployeeRequest.getPhoneNumber())
                 .roles(roles)
-                .passwordHash(SystemUtility.generatePassword(10))
+                .passwordHash(temporaryPassword)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .createdBy(creator.getEmailAddress())
                 .updatedBy(creator.getEmailAddress())
+                .userStatus(UserStatus.PENDING_VERIFICATION)
+                .employmentStatus(EmploymentStatus.ACTIVE)
                 .build();
     }
 }
