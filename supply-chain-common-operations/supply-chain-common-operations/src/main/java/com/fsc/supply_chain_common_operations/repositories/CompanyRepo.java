@@ -8,5 +8,12 @@ import java.util.UUID;
 
 @Repository
 public interface CompanyRepo extends JpaRepository<Company, UUID> {
+
     boolean existsByEmailAddressIgnoreCase(String emailAddress);
+
+    boolean existsByCompanyNameIgnoreCase(String companyName);
+
+    boolean existsByGstNumberIgnoreCase(String gstNumber);
+
+    boolean existsByPanNumberIgnoreCase(String panNumber);
 }
