@@ -1,12 +1,19 @@
 package com.slo.supplier_lifecycle_operations.controllers;
 
+import com.fsc.supply_chain_common_operations.enums.ProductType;
+import com.fsc.supply_chain_common_operations.enums.UnitOfMeasure;
 import com.fsc.supply_chain_common_operations.models.Product;
+import org.springframework.web.bind.annotation.RequestParam;
 import com.fsc.supply_chain_common_operations.models.ProductCategory;
 import com.slo.supplier_lifecycle_operations.dtos.requests.ProductRequest;
 import com.slo.supplier_lifecycle_operations.dtos.responses.ProductResponse;
 import com.slo.supplier_lifecycle_operations.services.ProductService;
 import com.slo.supplier_lifecycle_operations.transformers.ProductTransformer;
-
+import com.slo.supplier_lifecycle_operations.dtos.requests.ProductStatusUpdateRequest;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,6 +74,37 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
+    @PreAuthorize("@companyAccess.isProcurementCompany(authentication)")
+    @GetMapping("/browse")
+    public ResponseEntity<Page<ProductResponse>> browseProducts(
+
+            @RequestParam(required = false)
+            String productName,
+
+            @RequestParam(required = false)
+            UUID categoryId,
+
+            @RequestParam(required = false)
+            ProductType productType,
+
+            @RequestParam(required = false)
+            UnitOfMeasure unitOfMeasure,
+
+            @PageableDefault(size = 10, sort = "productName")
+            Pageable pageable) {
+
+        Page<ProductResponse> products =
+                productService.browseActiveProducts(
+                        productName,
+                        categoryId,
+                        productType,
+                        unitOfMeasure,
+                        pageable
+                ).map(productTransformer::toResponse);
+
+        return ResponseEntity.ok(products);
+    }
+
     @PatchMapping("/{productId}")
     public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable UUID productId,
@@ -94,5 +132,32 @@ public class ProductController {
 
         return ResponseEntity.ok(
                 productTransformer.toResponse(savedProduct));
+    }
+
+    @PatchMapping("/{productId}/status")
+    public ResponseEntity<ProductResponse> updateProductStatus(
+            @PathVariable UUID productId,
+            @Valid @RequestBody ProductStatusUpdateRequest request) {
+
+        Product updatedProduct = productService.updateProductStatus(
+                productId,
+                request.getStatus()
+        );
+
+        return ResponseEntity.ok(
+                productTransformer.toResponse(updatedProduct)
+        );
+    }
+    @PreAuthorize("@companyAccess.isSupplierCompany(authentication)")
+    @GetMapping("/my-drafts")
+    public ResponseEntity<List<ProductResponse>> getMyDraftProducts() {
+
+        List<ProductResponse> drafts =
+                productService.getMyDraftProducts()
+                        .stream()
+                        .map(productTransformer::toResponse)
+                        .toList();
+
+        return ResponseEntity.ok(drafts);
     }
 }

@@ -10,11 +10,15 @@ import com.fsc.supply_chain_common_operations.models.SupplierCompany;
 import com.fsc.supply_chain_common_operations.repositories.ProductCategoryRepo;
 import com.fsc.supply_chain_common_operations.repositories.ProductRepo;
 import com.fsc.supply_chain_common_operations.repositories.SupplierCompanyRepo;
+import com.fsc.supply_chain_common_operations.enums.ProductType;
+import com.fsc.supply_chain_common_operations.enums.UnitOfMeasure;
 import io.jsonwebtoken.Claims;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.UUID;
@@ -140,6 +144,38 @@ public class ProductService {
                 supplier.getSysId());
     }
 
+    @Transactional(readOnly = true)
+    public List<Product> getMyDraftProducts() {
+
+        // Identify the authenticated supplier
+        SupplierCompany supplier = getActiveSupplier();
+
+        // Retrieve only this supplier's DRAFT products
+        return productRepo.findBySupplierCompany_SysIdAndStatus(
+                supplier.getSysId(),
+                ProductStatus.DRAFT
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Product> browseActiveProducts(
+            String productName,
+            UUID categoryId,
+            ProductType productType,
+            UnitOfMeasure unitOfMeasure,
+            Pageable pageable) {
+
+        return productRepo.searchActiveProducts(
+                ProductStatus.ACTIVE,
+                CompanyStatus.ACTIVE,
+                productName==null ?"": productName.trim(),
+                categoryId,
+                productType,
+                unitOfMeasure,
+                pageable
+        );
+    }
+
     @Transactional
     public Product updateProduct(UUID productId, Product updatedProduct) {
 
@@ -217,6 +253,57 @@ public class ProductService {
         if (updatedProduct.getImageUrl() != null) {
             existingProduct.setImageUrl(updatedProduct.getImageUrl());
         }
+
+        return productRepo.save(existingProduct);
+    }
+
+    @Transactional
+    public Product updateProductStatus(UUID productId, ProductStatus newStatus) {
+
+        SupplierCompany supplier = getActiveSupplier();
+
+        Product existingProduct = productRepo.findById(productId)
+                .orElseThrow(() -> new RecordDoesNotExistException(
+                        "Product not found: " + productId));
+
+        // Verify product ownership
+        if (!existingProduct.getSupplierCompany().getSysId()
+                .equals(supplier.getSysId())) {
+            throw new AccessDeniedException(
+                    "You are not authorized to update this product.");
+        }
+
+        ProductStatus currentStatus = existingProduct.getStatus();
+
+        if (newStatus == null) {
+            throw new IllegalArgumentException(
+                    "Product status is required.");
+        }
+
+        // Validate allowed status transitions
+        boolean allowed = switch (currentStatus) {
+            case DRAFT ->
+                    newStatus == ProductStatus.ACTIVE ||
+                            newStatus == ProductStatus.INACTIVE;
+
+            case ACTIVE ->
+                    newStatus == ProductStatus.INACTIVE ||
+                            newStatus == ProductStatus.DISCONTINUED;
+
+            case INACTIVE ->
+                    newStatus == ProductStatus.ACTIVE ||
+                            newStatus == ProductStatus.DISCONTINUED;
+
+            case DISCONTINUED -> false;
+        };
+
+        if (!allowed) {
+            throw new IllegalArgumentException(
+                    "Invalid product status transition: "
+                            + currentStatus + " -> " + newStatus);
+        }
+
+        existingProduct.setStatus(newStatus);
 
         return productRepo.save(existingProduct);
     }
