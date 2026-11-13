@@ -59,6 +59,7 @@ public interface OperationRepo extends JpaRepository<Operation, UUID> {
                 'COMPANY',
                 'USER_MANAGEMENT',
                 'SUPPLIER_MANAGEMENT',
+                 'PROCUREMENT_MANAGEMENT',                                   
                 'CATALOG',
                 'PURCHASE_REQUEST',
                 'SOURCING',
