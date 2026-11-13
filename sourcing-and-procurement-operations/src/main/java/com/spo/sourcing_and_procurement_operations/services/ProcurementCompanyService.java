@@ -8,7 +8,7 @@ import com.fsc.supply_chain_common_operations.repositories.CompanyRepo;
 import com.fsc.supply_chain_common_operations.services.EmployeeService;
 import com.fsc.supply_chain_common_operations.utilities.SystemUtility;
 import com.spo.sourcing_and_procurement_operations.dtos.requests.ProcurementCompanyRegistrationRequest;
-import com.spo.sourcing_and_procurement_operations.repositories.ProcurementCompanyRepository;
+import com.fsc.supply_chain_common_operations.repositories.ProcurementCompanyRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,10 +18,13 @@ import com.spo.sourcing_and_procurement_operations.dtos.requests.ProcurementComp
 import com.spo.sourcing_and_procurement_operations.dtos.requests.ProcurementCompanyReviewRequest;
 import com.spo.sourcing_and_procurement_operations.dtos.responses.ProcurementCompanyResponse;
 import com.spo.sourcing_and_procurement_operations.transformer.ProcurementCompanyResponseTransformer;
-import com.spo.sourcing_and_procurement_operations.repositories.ProcurementCompanyRepository;
 import java.util.NoSuchElementException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import com.fsc.supply_chain_common_operations.services.AuthService;
+import com.fsc.supply_chain_common_operations.utilities.JwtUtility;
+import io.jsonwebtoken.Claims;
+import org.springframework.security.access.AccessDeniedException;
 
 
 import java.util.UUID;
@@ -31,19 +34,59 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ProcurementCompanyService {
     @Autowired
-    private ProcurementCompanyRepository procurementCompanyRepository;
+    private ProcurementCompanyRepo procurementCompanyRepo;
     private final CompanyRepo companyRepo;
     private final EmployeeService employeeService;
     private final ProcurementCompanyTransformer transformer;
+    private final AuthService authService;
+    private final JwtUtility jwtUtility;
 
     public ProcurementCompanyService(
             CompanyRepo companyRepo,
             EmployeeService employeeService,
-            ProcurementCompanyTransformer transformer
+            ProcurementCompanyTransformer transformer,
+            AuthService authService,
+            JwtUtility jwtUtility
     ) {
         this.companyRepo = companyRepo;
         this.employeeService = employeeService;
         this.transformer = transformer;
+        this.authService=   authService;
+        this.jwtUtility=jwtUtility;
+    }
+
+    private void validateCompanyAccess(UUID companyId, String token) {
+
+        Claims claims = jwtUtility.extractAllClaims(token);
+
+        String authenticatedCompanyId =
+                claims.get("companyId", String.class);
+
+        if (authenticatedCompanyId == null) {
+            throw new AccessDeniedException("Company access denied.");
+        }
+
+        // Check whether the requested company belongs to the logged-in employee.
+        if (companyId.toString().equals(authenticatedCompanyId)) {
+
+            // Verify that the employee account is still active.
+            String email = claims.get("email", String.class);
+            Employee employee = employeeService.getEmployeeByEmail(email);
+
+            if (employee == null ||
+                    employee.getUserStatus() !=
+                            com.fsc.supply_chain_common_operations.enums.UserStatus.ACTIVE ||
+                    employee.getCompany() == null ||
+                    !companyId.equals(employee.getCompany().getSysId())) {
+
+                throw new AccessDeniedException("Company access denied.");
+            }
+
+            return;
+        }
+
+        // A different company can only be accessed by an authorized reviewer.
+        authService.isUserHavingAccess(token, "APPROVE_PROCUREMENT");
     }
 
     @Transactional
@@ -87,29 +130,38 @@ public class ProcurementCompanyService {
     public Page<ProcurementCompanyResponse> getAllCompanies(
             Pageable pageable) {
 
-        return procurementCompanyRepository.findAll(pageable)
+        return procurementCompanyRepo.findAll(pageable)
                 .map(ProcurementCompanyResponseTransformer::mapToResponse);
     }
-    public ProcurementCompanyResponse getCompanyById(UUID id) {
+    public ProcurementCompanyResponse getCompanyById(
+            UUID id,
+            String token) {
 
-        ProcurementCompany company = procurementCompanyRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Procurement company not found"
-                ));
+        validateCompanyAccess(id, token);
+
+        ProcurementCompany company =
+                procurementCompanyRepo.findById(id)
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Procurement company not found"
+                        ));
 
         return ProcurementCompanyResponseTransformer.mapToResponse(company);
     }
     @Transactional
     public ProcurementCompanyResponse updateCompany(
             UUID id,
-            ProcurementCompanyUpdateRequest request) {
+            ProcurementCompanyUpdateRequest request,
+            String token) {
 
-        ProcurementCompany company =  procurementCompanyRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Procurement company not found"
-                ));
+        validateCompanyAccess(id, token);
+
+        ProcurementCompany company =
+                procurementCompanyRepo.findById(id)
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Procurement company not found"
+                        ));
 
         if (request.getLegalName() != null) {
             company.setLegalName(request.getLegalName());
@@ -124,7 +176,7 @@ public class ProcurementCompanyService {
         }
 
         ProcurementCompany updatedCompany =
-                procurementCompanyRepository.save(company);
+                procurementCompanyRepo.save(company);
 
         return ProcurementCompanyResponseTransformer
                 .mapToResponse(updatedCompany);
@@ -134,7 +186,7 @@ public class ProcurementCompanyService {
             UUID id,
             ProcurementCompanyReviewRequest request) {
 
-        ProcurementCompany company = procurementCompanyRepository.findById(id)
+        ProcurementCompany company = procurementCompanyRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Procurement company not found"
@@ -178,13 +230,13 @@ public class ProcurementCompanyService {
         }
 
         return ProcurementCompanyResponseTransformer.mapToResponse(
-                    procurementCompanyRepository.save(company)
+                    procurementCompanyRepo.save(company)
         );
     }
     @Transactional
     public ProcurementCompany suspendCompany(UUID id) {
 
-        ProcurementCompany company = procurementCompanyRepository.findById(id)
+        ProcurementCompany company = procurementCompanyRepo.findById(id)
                 .orElseThrow(() ->
                         new NoSuchElementException("Procurement company not found"));
 
@@ -195,12 +247,12 @@ public class ProcurementCompanyService {
 
         company.setStatus(CompanyStatus.SUSPENDED);
 
-        return procurementCompanyRepository.save(company);
+        return procurementCompanyRepo.save(company);
     }
     @Transactional
     public ProcurementCompany reinstateCompany(UUID id) {
 
-        ProcurementCompany company = procurementCompanyRepository.findById(id)
+        ProcurementCompany company = procurementCompanyRepo.findById(id)
                 .orElseThrow(() ->
                         new NoSuchElementException("Procurement company not found"));
 
@@ -212,6 +264,6 @@ public class ProcurementCompanyService {
 
         company.setStatus(CompanyStatus.UNDER_REVIEW);
 
-        return procurementCompanyRepository.save(company);
+        return procurementCompanyRepo.save(company);
     }
 }

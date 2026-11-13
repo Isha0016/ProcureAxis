@@ -98,10 +98,10 @@ public class SupplierCompanyController {
     }
     @GetMapping("/{companyId}")
     public ResponseEntity<SupplierCompany> getSupplierCompanyById(
-            @PathVariable UUID companyId) {
+            @PathVariable UUID companyId , @RequestHeader("token") String token) {
 
         SupplierCompany company =
-                supplierCompanyService.getSupplierCompanyById(companyId);
+                supplierCompanyService.getSupplierCompanyById(companyId,token);
 
         return ResponseEntity.ok(company);
     }
@@ -115,5 +115,17 @@ public class SupplierCompanyController {
                         companyId, request);
 
         return ResponseEntity.ok(updatedCompany);
+    }
+    @PostMapping("/{companyId}/reinstate")
+    public ResponseEntity<SupplierCompany> reinstateSupplierCompany(
+            @PathVariable UUID companyId,
+            @RequestHeader("token") String token) {
+
+        authService.isUserHavingAccess(token, "APPROVE_SUPPLIER");
+
+        SupplierCompany company =
+                supplierCompanyService.reinstateSupplierCompany(companyId);
+
+        return ResponseEntity.ok(company);
     }
 }

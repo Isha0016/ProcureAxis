@@ -28,6 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import io.jsonwebtoken.Claims;
 import com.fsc.supply_chain_common_operations.enums.CompanyType;
 import java.util.UUID;
+import com.fsc.supply_chain_common_operations.services.AuthService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,12 +41,13 @@ import java.util.concurrent.ExecutorService;
 @Service
 public class SupplierCompanyService {
 
-    private SupplierCompanyRepo supplierCompanyRepo;
-    private EmployeeService employeeService;
-    private NotificationTemplateRepo notificationTemplateRepo;
-    private NotificationContextRepo notificationContextRepo;
-    private ExecutorService executorService;
-    private NotificationService notificationService;
+    private final  SupplierCompanyRepo supplierCompanyRepo;
+    private final EmployeeService employeeService;
+    private final NotificationTemplateRepo notificationTemplateRepo;
+    private final NotificationContextRepo notificationContextRepo;
+    private final ExecutorService executorService;
+    private final NotificationService notificationService;
+    private final AuthService authService;
 
 
     @Autowired
@@ -54,7 +56,7 @@ public class SupplierCompanyService {
                                   NotificationTemplateRepo notificationTemplateRepo,
                                   NotificationService notificationService,
                                   NotificationContextRepo notificationContextRepo,
-                                  ExecutorService executorService
+                                  ExecutorService executorService,AuthService authService
                                   ){
         this.supplierCompanyRepo = supplierCompanyRepo;
         this.employeeService = employeeService;
@@ -62,7 +64,7 @@ public class SupplierCompanyService {
         this.notificationService = notificationService;
         this.executorService = executorService;
         this.notificationContextRepo = notificationContextRepo;
-
+        this.authService =  authService;
     }
 
     public SupplierCompany registerSupplierCompany(
@@ -265,6 +267,28 @@ public class SupplierCompanyService {
 
         return supplierCompanyRepo.save(company);
     }
+    @Transactional
+    public SupplierCompany reinstateSupplierCompany(UUID companyId) {
+
+        SupplierCompany company = supplierCompanyRepo.findById(companyId)
+                .orElseThrow(() -> new RecordDoesNotExistException(
+                        "Supplier company not found: " + companyId));
+
+        if (company.getStatus() != CompanyStatus.SUSPENDED &&
+                company.getStatus() != CompanyStatus.INACTIVE) {
+
+            throw new IllegalStateException(
+                    "Only SUSPENDED or INACTIVE suppliers can be reinstated.");
+        }
+
+        // Reinstatement requires another internal review.
+        company.setStatus(CompanyStatus.UNDER_REVIEW);
+
+        return supplierCompanyRepo.save(company);
+    }
+
+
+
 
 
     @Transactional
@@ -292,23 +316,32 @@ public class SupplierCompanyService {
     }
 
     @Transactional(readOnly = true)
-    public SupplierCompany getSupplierCompanyById(UUID companyId) {
+    public SupplierCompany getSupplierCompanyById(
+            UUID companyId, String token) {
+
         Claims claims = (Claims) SecurityContextHolder
                 .getContext()
                 .getAuthentication()
                 .getPrincipal();
 
-        String authenticatedCompanyId = claims.get("companyId", String.class);
+        String authenticatedCompanyId =
+                claims.get("companyId", String.class);
 
-        if (!companyId.toString().equals(authenticatedCompanyId)) {
-            throw new AccessDeniedException(
-                    "You are not authorized to access this company"
-            );
+        // Supplier can access its own company.
+        if (companyId.toString().equals(authenticatedCompanyId)) {
+            return supplierCompanyRepo.findById(companyId)
+                    .orElseThrow(() -> new RecordDoesNotExistException(
+                            "Supplier company not found: " + companyId));
         }
+
+        // Access to another company requires internal reviewer permission.
+        authService.isUserHavingAccess(token, "APPROVE_SUPPLIER");
+
         return supplierCompanyRepo.findById(companyId)
                 .orElseThrow(() -> new RecordDoesNotExistException(
                         "Supplier company not found: " + companyId));
     }
+
     @Transactional
     public SupplierCompany updateSupplierCompany(
             UUID companyId,

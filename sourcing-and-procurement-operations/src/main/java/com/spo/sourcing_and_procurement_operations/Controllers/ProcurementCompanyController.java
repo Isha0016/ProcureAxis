@@ -53,39 +53,31 @@ public class ProcurementCompanyController {
                 .status(HttpStatus.CREATED)
                 .body("Procurement company registered successfully");
     }
-    // GET ALL PROCUREMENT COMPANIES
+
+
+
+// GET PROCUREMENT COMPANY BY ID
 
     @GetMapping
     public ResponseEntity<Page<ProcurementCompanyResponse>> getAllCompanies(
+            @RequestHeader("token") String token,
             @PageableDefault(size = 10) Pageable pageable) {
+
+        authService.isUserHavingAccess(token, "APPROVE_PROCUREMENT");
 
         return ResponseEntity.ok(
                 procurementCompanyService.getAllCompanies(pageable)
         );
     }
 
-
-// GET PROCUREMENT COMPANY BY ID
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ProcurementCompanyResponse> getCompanyById(
-            @PathVariable UUID id) {
-
-        return ResponseEntity.ok(
-                procurementCompanyService.getCompanyById(id)
-        );
-    }
-
-
-// UPDATE PROCUREMENT COMPANY PROFILE
-
     @PatchMapping("/{id}")
     public ResponseEntity<ProcurementCompanyResponse> updateCompany(
             @PathVariable UUID id,
-            @RequestBody ProcurementCompanyUpdateRequest request) {
+            @RequestHeader("token") String token,
+            @Valid @RequestBody ProcurementCompanyUpdateRequest request) {
 
         return ResponseEntity.ok(
-                procurementCompanyService.updateCompany(id, request)
+                procurementCompanyService.updateCompany(id, request, token)
         );
     }
 
