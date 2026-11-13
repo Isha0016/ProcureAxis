@@ -1,5 +1,5 @@
 package com.fsc.supply_chain_common_operations.handlers;
-
+import com.fsc.supply_chain_common_operations.exceptions.RecordDoesNotExistException;
 import com.fsc.supply_chain_common_operations.exceptions.DuplicateRecordException;
 import com.fsc.supply_chain_common_operations.exceptions.UnAuthorizedException;
 import org.springframework.http.HttpStatus;
@@ -23,6 +23,34 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnAuthorizedException.class)
     public ResponseEntity<Map<String, String>> handleUnauthorized(
             UnAuthorizedException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(Map.of("message", exception.getMessage()));
+    }
+    @ExceptionHandler(RecordDoesNotExistException.class)
+    public ResponseEntity<Map<String, String>> handleRecordNotFound(
+            RecordDoesNotExistException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", exception.getMessage()));
+    }
+
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleBadRequest(
+            IllegalArgumentException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("message", exception.getMessage()));
+    }
+
+    @ExceptionHandler(
+            org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> handleAccessDenied(
+            org.springframework.security.access.AccessDeniedException exception) {
 
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)

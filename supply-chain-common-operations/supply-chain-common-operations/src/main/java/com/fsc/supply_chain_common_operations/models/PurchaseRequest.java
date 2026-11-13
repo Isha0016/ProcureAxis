@@ -9,12 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-/**
- * For example if I am a procurement company called TCS. Somendra is employee working for TCS
- * Somendra wants to place purchase request on behalf of TCS.
- * Somendra PR --- Somendra's Managers approval ---- Supplier Company
- *
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
