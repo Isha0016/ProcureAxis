@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.fsc.supply_chain_common_operations.repositories.NotificationContextRepo;
 import com.fsc.supply_chain_common_operations.repositories.CompanyRepo;
+import com.fsc.supply_chain_common_operations.dtos.requests.AssignEmployeeManagerRequest;
+import com.fsc.supply_chain_common_operations.enums.UserStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -111,13 +113,57 @@ public class EmployeeService implements EntityService<Employee> {
     ){
       commonUtility.validateBasicChecks(new CommonValidationDto(inviteEmployeeRequest.getRoleSysIds(), invitorEmp.getSysId(),inviteEmployeeRequest.getCompanySysId()));
       // Map the request to the model.
-      Employee manager =  this.getEmployeeBySysId(inviteEmployeeRequest.getManagerSysId());
-      if(manager == null){
-          log.warn("Manager details not passed");
-      }
-      List<Role> roles = roleService.fetchRolesBySysId(inviteEmployeeRequest.getRoleSysIds());
-      String temporaryPassword = SystemUtility.generatePassword(10);
-      Employee employee = EntityTransformer.mapEmpRequestToEmpModel(inviteEmployeeRequest, invitorEmp.getCompany(), invitorEmp, manager,roles, temporaryPassword);
+        // Fetch the target company using companySysId
+        Company company = companyRepo.findById(
+                inviteEmployeeRequest.getCompanySysId()
+        ).orElseThrow(() ->
+                new IllegalArgumentException(
+                        "Company not found: "
+                                + inviteEmployeeRequest.getCompanySysId()
+                )
+        );
+
+// Fetch manager only when managerSysId is provided
+        Employee manager = null;
+
+        if (inviteEmployeeRequest.getManagerSysId() != null) {
+            manager = this.getEmployeeBySysId(
+                    inviteEmployeeRequest.getManagerSysId()
+            );
+
+            if (manager == null) {
+                throw new IllegalArgumentException(
+                        "Manager employee not found"
+                );
+            }
+
+            // Manager must belong to the target company
+            if (!manager.getCompany().getSysId()
+                    .equals(company.getSysId())) {
+                throw new IllegalArgumentException(
+                        "Manager does not belong to the target company"
+                );
+            }
+        }
+
+// Fetch roles assigned to the employee
+        List<Role> roles = roleService.fetchRolesBySysId(
+                inviteEmployeeRequest.getRoleSysIds()
+        );
+
+        String temporaryPassword = SystemUtility.generatePassword(10);
+
+// Map employee using the target company, not the invitor's company
+        Employee employee = EntityTransformer.mapEmpRequestToEmpModel(
+                inviteEmployeeRequest,
+                company,
+                invitorEmp,
+                manager,
+                roles,
+                temporaryPassword
+        );
+
+        employee = this.saveOrUpdate(employee);
       employee = this.saveOrUpdate(employee);
         HashMap<String, String> emailMap = new HashMap<>();
         emailMap.put("temporaryPassword", temporaryPassword);
@@ -189,4 +235,46 @@ public class EmployeeService implements EntityService<Employee> {
       return employee;
     }
 
+    public Employee assignManager(
+            UUID employeeSysId,
+            AssignEmployeeManagerRequest request
+    ) {
+        Employee employee = employeeRepo.findById(employeeSysId)
+                .orElseThrow(() ->
+                        new RuntimeException("Employee not found"));
+
+        Employee manager = employeeRepo.findById(request.getManagerSysId())
+                .orElseThrow(() ->
+                        new RuntimeException("Manager not found"));
+
+        if (employee.getSysId().equals(manager.getSysId())) {
+            throw new RuntimeException("Employee cannot be their own manager");
+        }
+
+        if (!employee.getCompany().getSysId()
+                .equals(manager.getCompany().getSysId())) {
+            throw new RuntimeException(
+                    "Employee and manager must belong to the same company");
+        }
+
+        if (manager.getUserStatus() != UserStatus.ACTIVE) {
+            throw new RuntimeException("Manager account is not active");
+        }
+
+        boolean canApprove = manager.getRoles().stream()
+                .filter(role -> role != null && role.getOperations() != null)
+                .flatMap(role -> role.getOperations().stream())
+                .anyMatch(operation ->
+                        "APPROVE_PURCHASE_REQUEST".equals(
+                                operation.getOperationName()));
+
+        if (!canApprove) {
+            throw new RuntimeException(
+                    "Manager does not have APPROVE_PURCHASE_REQUEST permission");
+        }
+
+        employee.setManager(manager);
+
+        return employeeRepo.save(employee);
+    }
 }

@@ -8,6 +8,7 @@ import com.fsc.supply_chain_common_operations.models.Operation;
 import com.fsc.supply_chain_common_operations.models.Role;
 import com.fsc.supply_chain_common_operations.repositories.RoleRepo;
 import com.fsc.supply_chain_common_operations.utilities.SystemUtility;
+import com.fsc.supply_chain_common_operations.repositories.CompanyRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,12 +24,14 @@ public class RoleService implements EntityService<Role> {
 
     private OperationService operationService;
     private RoleRepo roleRepo;
+    private CompanyRepo companyRepo;
 
     @Autowired
     public RoleService(OperationService operationService,
-                       RoleRepo roleRepo){
+                       RoleRepo roleRepo,CompanyRepo companyRepo){
         this.operationService = operationService;
         this.roleRepo = roleRepo;
+        this.companyRepo=companyRepo;
     }
 
     public Role fetchRoleByName(String roleName){
@@ -36,17 +39,36 @@ public class RoleService implements EntityService<Role> {
     }
 
     public Role createRole(CreateRoleRequest createRoleRequest,
-                           Employee creator){
-        List<Operation> operations = operationService.fetchOperationsByName(createRoleRequest.getOperationName());
+                           Employee creator) {
+
+        // Fetch the company for which the role is being created
+        Company company = companyRepo
+                .findById(createRoleRequest.getCompanySysId())
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Company not found with sysId: "
+                                        + createRoleRequest.getCompanySysId()
+                        )
+                );
+
+        // Fetch requested operations
+        List<Operation> operations =
+                operationService.fetchOperationsByName(
+                        createRoleRequest.getOperationName()
+                );
+
+        // Create role under the target company's name
         Role role = Role.builder()
                 .roleId(SystemUtility.generateId("ROLE"))
-                .roleName(creator.getCompany().getCompanyName() + "_" + createRoleRequest.getRoleName())
+                .roleName(company.getCompanyName()
+                        + "_" + createRoleRequest.getRoleName())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .createdBy(creator.getEmailAddress())
                 .updatedBy(creator.getEmailAddress())
                 .operations(operations)
                 .build();
+
         return this.saveOrUpdate(role);
     }
 

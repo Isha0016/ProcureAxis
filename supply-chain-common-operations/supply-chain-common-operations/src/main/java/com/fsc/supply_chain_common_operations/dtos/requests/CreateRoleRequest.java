@@ -5,11 +5,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateRoleRequest {
+
+    private UUID companySysId;
     private String roleName;
     private List<String> operationName;
 }

@@ -1,6 +1,6 @@
 package com.fsc.supply_chain_common_operations.controllers;
 
-
+import com.fsc.supply_chain_common_operations.dtos.requests.AssignEmployeeManagerRequest;
 import com.fsc.supply_chain_common_operations.dtos.requests.CreateRoleRequest;
 import com.fsc.supply_chain_common_operations.dtos.requests.EmployeeLoginRequest;
 import com.fsc.supply_chain_common_operations.dtos.requests.InviteEmployeeRequest;
@@ -18,13 +18,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/common")
 public class CommonController {
 
-    private AuthService authService;
-    private RoleService roleService;
-    private EmployeeService employeeService;
+    private final AuthService authService;
+    private final RoleService roleService;
+    private final EmployeeService employeeService;
 
     @Autowired
     public CommonController(AuthService authService,
@@ -111,5 +113,34 @@ public class CommonController {
             return new ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+    @PatchMapping("/emp/{employeeSysId}/manager")
+    public ResponseEntity assignEmployeeManager(
+            @PathVariable UUID employeeSysId,
+            @RequestBody AssignEmployeeManagerRequest request,
+            @RequestHeader String token
+    ) {
+        try {
+            authService.isUserHavingAccess(
+                    token,
+                    "UPDATE_COMPANY_EMPLOYEE"
+            );
+
+            Employee employee =
+                    employeeService.assignManager(employeeSysId, request);
+
+            return new ResponseEntity<>(employee, HttpStatus.OK);
+
+        } catch (UnAuthorizedException e) {
+            ErrorResponse errorResponse =
+                    new ErrorResponse(HttpStatus.UNAUTHORIZED, e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+
+        } catch (Exception e) {
+            ErrorResponse errorResponse =
+                    new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

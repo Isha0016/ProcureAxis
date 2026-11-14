@@ -58,7 +58,7 @@ public class EntityTransformer {
             String temporaryPassword
     ){
         return Employee.builder()
-                .employeeCode(SystemUtility.generateId("EMPLOYEE"))
+                .employeeCode(SystemUtility.generateEmployeeCode())
                 .emailAddress(inviteEmployeeRequest.getEmailAddress())
                 .company(company)
                 .manager(manager)

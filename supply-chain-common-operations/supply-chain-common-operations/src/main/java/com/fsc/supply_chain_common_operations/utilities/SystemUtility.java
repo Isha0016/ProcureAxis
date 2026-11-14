@@ -18,6 +18,12 @@ public class SystemUtility {
         return prefix + "-" + randomNumber;
     }
 
+    public static String generateEmployeeCode() {
+        return "EMPLOYEE-" + UUID.randomUUID()
+                .toString()
+                .toUpperCase();
+    }
+
 
     public static String generatePassword(int length) {
 
