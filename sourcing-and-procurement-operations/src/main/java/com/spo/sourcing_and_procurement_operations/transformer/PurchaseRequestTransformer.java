@@ -22,7 +22,8 @@ public class PurchaseRequestTransformer {
             List<PurchaseRequestLine> requestLines) {
 
         return PurchaseRequestResponse.builder()
-                .requestLines(requestLines.stream()
+                .requestLines(
+                        requestLines.stream()
                                 .map(lineTransformer::toResponse)
                                 .toList()
                 )
@@ -33,25 +34,27 @@ public class PurchaseRequestTransformer {
                 .requestStatus(purchaseRequest.getRequestStatus())
                 .priority(purchaseRequest.getPriority())
                 .requiredDate(purchaseRequest.getRequiredDate())
-
                 .companySysId(
                         purchaseRequest.getCompany() != null
                                 ? purchaseRequest.getCompany().getSysId()
                                 : null)
-
                 .companyName(
                         purchaseRequest.getCompany() != null
                                 ? purchaseRequest.getCompany().getCompanyName()
                                 : null)
-
                 .submitterEmployeeSysId(
                         purchaseRequest.getSubmitterEmployee() != null
                                 ? purchaseRequest.getSubmitterEmployee().getSysId()
                                 : null)
-
+                .procurementApprovalManagerSysId(
+                        purchaseRequest.getProcurementApprovalManager() != null
+                                ? purchaseRequest.getProcurementApprovalManager().getSysId()
+                                : null)
                 .deliveryLocation(purchaseRequest.getDeliveryLocation())
                 .currencyCode(purchaseRequest.getCurrencyCode())
                 .budgetCode(purchaseRequest.getBudgetCode())
+                .estimatedTotalAmount(
+                        purchaseRequest.getEstimatedTotalAmount())
                 .build();
     }
 }

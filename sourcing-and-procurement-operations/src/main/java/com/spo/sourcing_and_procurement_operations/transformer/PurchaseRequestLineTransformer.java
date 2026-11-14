@@ -21,11 +21,12 @@ public class PurchaseRequestLineTransformer {
                         requestLine.getProduct() != null
                                 ? requestLine.getProduct().getProductCode()
                                 : null)
-
-                // Read historical snapshots from RequestLine
                 .itemDescription(requestLine.getItemDescription())
                 .quantity(requestLine.getQuantity())
                 .unitOfMeasure(requestLine.getUnitOfMeasure())
+                .estimatedUnitPrice(requestLine.getEstimatedUnitPrice())
+                .estimatedLineAmount(requestLine.getEstimatedLineAmount())
+                .currencyCode(requestLine.getCurrencyCode())
                 .notes(requestLine.getNotes())
                 .build();
     }

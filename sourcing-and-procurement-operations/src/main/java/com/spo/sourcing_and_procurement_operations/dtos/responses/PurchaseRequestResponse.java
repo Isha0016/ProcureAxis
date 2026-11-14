@@ -4,14 +4,18 @@ import com.fsc.supply_chain_common_operations.enums.RequestPriority;
 import com.fsc.supply_chain_common_operations.enums.RequestStatus;
 import lombok.Builder;
 import lombok.Data;
-import java.util.List;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Data
 @Builder
 public class PurchaseRequestResponse {
+
     private List<PurchaseRequestLineResponse> requestLines;
+
     private UUID sysId;
 
     private String requestNumber;
@@ -32,9 +36,13 @@ public class PurchaseRequestResponse {
 
     private UUID submitterEmployeeSysId;
 
+    private UUID procurementApprovalManagerSysId;
+
     private String deliveryLocation;
 
     private String currencyCode;
 
     private String budgetCode;
+
+    private BigDecimal estimatedTotalAmount;
 }

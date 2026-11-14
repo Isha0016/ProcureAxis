@@ -8,6 +8,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
+import java.time.LocalDate;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -26,10 +28,16 @@ public class PurchaseRequestCreateRequest {
     @NotNull(message = "Priority is required")
     private RequestPriority priority;
 
+    @NotNull(message = "Required date is required")
     private LocalDate requiredDate;
 
+    @NotBlank(message = "Delivery location is required")
+    @Size(max = 255, message = "Delivery location cannot exceed 255 characters")
     private String deliveryLocation;
 
+    @NotBlank(message = "Currency code is required")
+    @Pattern(regexp = "^[A-Z]{3}$",
+            message = "Currency code must be a valid 3-letter uppercase code")
     private String currencyCode;
 
     private String budgetCode;

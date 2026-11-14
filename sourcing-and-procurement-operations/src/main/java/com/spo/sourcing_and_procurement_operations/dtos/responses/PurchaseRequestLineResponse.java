@@ -25,5 +25,11 @@ public class PurchaseRequestLineResponse {
 
     private UnitOfMeasure unitOfMeasure;
 
+    private BigDecimal estimatedUnitPrice;
+
+    private BigDecimal estimatedLineAmount;
+
+    private String currencyCode;
+
     private String notes;
 }
