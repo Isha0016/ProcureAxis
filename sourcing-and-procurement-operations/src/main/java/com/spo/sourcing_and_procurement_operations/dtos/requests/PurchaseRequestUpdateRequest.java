@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -26,10 +27,15 @@ public class PurchaseRequestUpdateRequest {
     @NotNull(message = "Priority is required")
     private RequestPriority priority;
 
+    @NotNull(message = "Required date is required")
     private LocalDate requiredDate;
 
+    @NotBlank(message = "Delivery location is required")
+    @Size(max = 255)
     private String deliveryLocation;
 
+    @NotBlank(message = "Currency code is required")
+    @Pattern(regexp = "^[A-Z]{3}$")
     private String currencyCode;
 
     private String budgetCode;

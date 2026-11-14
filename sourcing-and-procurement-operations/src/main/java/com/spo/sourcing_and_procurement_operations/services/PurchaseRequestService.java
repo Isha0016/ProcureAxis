@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -723,6 +724,25 @@ public class PurchaseRequestService {
         if (purchaseRequest.getRequestStatus() != RequestStatus.DRAFT) {
             throw new IllegalStateException(
                     "Only DRAFT purchase requests can be edited");
+        }
+
+        // Validate required date
+        if (request.getRequiredDate().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException(
+                    "Required date cannot be in the past");
+        }
+
+        // Validate delivery location
+        if (request.getDeliveryLocation().isBlank()) {
+            throw new IllegalArgumentException(
+                    "Delivery location is required");
+        }
+
+        // Validate currency code
+        if (request.getCurrencyCode() == null ||
+                !request.getCurrencyCode().matches("^[A-Z]{3}$")) {
+            throw new IllegalArgumentException(
+                    "Valid currency code is required");
         }
 
         purchaseRequest.setTitle(request.getTitle().trim());
