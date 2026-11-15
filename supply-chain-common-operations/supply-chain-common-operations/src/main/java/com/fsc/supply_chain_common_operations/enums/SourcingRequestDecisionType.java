@@ -1,0 +1,13 @@
+package com.fsc.supply_chain_common_operations.enums;
+
+public enum SourcingRequestDecisionType {
+
+    SUBMITTED,
+    PENDING_APPROVAL_ASSIGNED,
+    APPROVED,
+    REJECTED,
+    REVISED,
+    CANCELLED,
+    PUBLISHED,
+    CLOSED
+}
