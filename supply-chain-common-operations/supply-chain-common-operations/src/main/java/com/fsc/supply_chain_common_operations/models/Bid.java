@@ -13,17 +13,34 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "bids")
 @Entity
+@Table(
+        name = "bids",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_bid_number",
+                        columnNames = "bid_number"
+                ),
+                @UniqueConstraint(
+                        name = "uk_sourcing_supplier_bid",
+                        columnNames = {
+                                "sourcing_request_sys_id",
+                                "supplier_company_sys_id"
+                        }
+                )
+        }
+)
 public class Bid extends GlobalRecord {
 
     @Column(name = "bid_number", nullable = false, length = 50)
     private String bidNumber;
 
-    @ManyToOne
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "sourcing_request_sys_id", nullable = false)
     private SourcingRequest sourcingRequest;
 
-    @ManyToOne
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_company_sys_id", nullable = false)
     private SupplierCompany supplierCompany;
 
     @Enumerated(EnumType.STRING)
@@ -61,4 +78,6 @@ public class Bid extends GlobalRecord {
     private BigDecimal evaluationScore;
 
     private Instant evaluatedAt;
+
+    private Long version;
 }
