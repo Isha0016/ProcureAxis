@@ -48,6 +48,19 @@ jobs:
         working-directory: supply-chain-common-operations/supply-chain-common-operations
         run: mvn -B clean install
 
+      - name: Run SLO Flyway migrations
+        working-directory: supplier-lifecycle-operations
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/fsc_ci
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: postgres
+          SPRING_FLYWAY_ENABLED: "true"
+          SPRING_FLYWAY_LOCATIONS: classpath:db/migration
+          SPRING_JPA_HIBERNATE_DDL_AUTO: none
+          MAIL_USERNAME: ci@example.local
+          MAIL_PASSWORD: ci-dummy-password
+        run: mvn -B spring-boot:run "-Dspring-boot.run.arguments=--spring.main.web-application-type=none"
+
       - name: Build and verify SLO
         working-directory: supplier-lifecycle-operations
         env:
