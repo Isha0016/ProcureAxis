@@ -10,6 +10,7 @@ import com.fsc.supply_chain_common_operations.models.Role;
 import com.fsc.supply_chain_common_operations.repositories.CompanyRepo;
 import com.fsc.supply_chain_common_operations.services.EmployeeService;
 import com.fsc.supply_chain_common_operations.services.RoleService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -27,6 +28,7 @@ public class InternalAdminBootstrap {
     private final CompanyRepo companyRepo;
     private final EmployeeService employeeService;
     private final RoleService roleService;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${fsc.bootstrap.internal-admin.enabled:false}")
     private boolean enabled;
@@ -40,11 +42,13 @@ public class InternalAdminBootstrap {
     public InternalAdminBootstrap(
             CompanyRepo companyRepo,
             EmployeeService employeeService,
-            RoleService roleService) {
+            RoleService roleService,
+            PasswordEncoder passwordEncoder) {
 
         this.companyRepo = companyRepo;
         this.employeeService = employeeService;
         this.roleService = roleService;
+        this.passwordEncoder=passwordEncoder;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -71,6 +75,17 @@ public class InternalAdminBootstrap {
                                 + "Use the approved account activation process."
                 );
             }
+
+            String storedPassword = existingEmployee.getPasswordHash();
+
+            if (storedPassword != null
+                    && storedPassword.equals(adminPassword)) {
+                existingEmployee.setPasswordHash(
+                        passwordEncoder.encode(adminPassword)
+                );
+                employeeService.saveOrUpdate(existingEmployee);
+            }
+
             return;
         }
 
@@ -105,7 +120,7 @@ public class InternalAdminBootstrap {
                 .lastName("Administrator")
                 .emailAddress(adminEmail)
                 .workEmail(adminEmail)
-                .passwordHash(adminPassword)
+                .passwordHash(passwordEncoder.encode(adminPassword))
                 .emailVerified(true)
                 .phoneVerified(false)
                 .userStatus(UserStatus.ACTIVE)

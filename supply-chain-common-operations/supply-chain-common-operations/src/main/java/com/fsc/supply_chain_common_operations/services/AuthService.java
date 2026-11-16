@@ -12,6 +12,7 @@ import com.fsc.supply_chain_common_operations.enums.CompanyType;
 import com.fsc.supply_chain_common_operations.enums.CompanyStatus;
 import com.fsc.supply_chain_common_operations.enums.UserStatus;
 import com.fsc.supply_chain_common_operations.models.Company;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,25 +24,31 @@ import java.util.List;
 @Service
 public class AuthService {
 
-    private EmployeeService employeeService;
-    private JwtUtility jwtUtility;
-    private RoleService roleService;
+    private final EmployeeService employeeService;
+    private final JwtUtility jwtUtility;
+    private final RoleService roleService;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public AuthService(EmployeeService employeeService,
                        JwtUtility jwtUtility,
-                       RoleService roleService){
+                       RoleService roleService,
+                       PasswordEncoder passwordEncoder){
         this.employeeService = employeeService;
         this.jwtUtility = jwtUtility;
         this.roleService = roleService;
+        this.passwordEncoder=passwordEncoder;
     }
 
     public EmployeeLoginResponse authenticateUser(EmployeeLoginRequest employeeLoginRequest){
         String email = employeeLoginRequest.getEmail();
         String password = employeeLoginRequest.getPassword();
         Employee employee = employeeService.getEmployeeByEmail(email);
-        if(employee == null || !employee.getPasswordHash().equals(password)){
-            throw new InvalidCredentialsException("Wrong email or password entered");
+        if (employee == null ||
+                !passwordEncoder.matches(password, employee.getPasswordHash())) {
+            throw new InvalidCredentialsException(
+                    "Wrong email or password entered"
+            );
         }
         employee.setLastLoginAt(Instant.now());
         employeeService.saveOrUpdate(employee);

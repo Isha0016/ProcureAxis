@@ -10,6 +10,7 @@ import com.fsc.supply_chain_common_operations.repositories.EmployeeRepo;
 import com.fsc.supply_chain_common_operations.transformers.EntityTransformer;
 import com.fsc.supply_chain_common_operations.utilities.CommonUtility;
 import com.fsc.supply_chain_common_operations.utilities.SystemUtility;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,25 +31,28 @@ import java.util.UUID;
 @Service
 public class EmployeeService implements EntityService<Employee> {
 
-    private RoleService roleService;
-    private EmployeeRepo employeeRepo;
-    private CompanyRepo companyRepo;
-    private CommonUtility commonUtility;
-    private NotificationService notificationService;
+    private final RoleService roleService;
+    private final EmployeeRepo employeeRepo;
+    private final CompanyRepo companyRepo;
+    private final CommonUtility commonUtility;
+    private final NotificationService notificationService;
     @Autowired
     private NotificationContextRepo notificationContextRepo;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public EmployeeService(RoleService roleService,
                            EmployeeRepo employeeRepo,
                            CompanyRepo companyRepo,
                            CommonUtility commonUtility,
-                           NotificationService notificationService){
+                           NotificationService notificationService,
+                           PasswordEncoder passwordEncoder){
         this.roleService = roleService;
         this.employeeRepo = employeeRepo;
         this.companyRepo = companyRepo;
         this.commonUtility = commonUtility;
         this.notificationService = notificationService;
+        this.passwordEncoder=passwordEncoder;
     }
 
     public Employee getEmployeeByEmail(String email){
@@ -80,6 +84,8 @@ public class EmployeeService implements EntityService<Employee> {
 
         Employee maintEmployee =
                 EntityTransformer.mapCompanyToEmployee(company, generatedPassword);
+
+        maintEmployee.setPasswordHash(passwordEncoder.encode(generatedPassword));
 
         log.debug("Company mapped to main employee successfully. companyId={}",
                 company.getSysId());
@@ -162,6 +168,8 @@ public class EmployeeService implements EntityService<Employee> {
                 roles,
                 temporaryPassword
         );
+
+        employee.setPasswordHash(passwordEncoder.encode(temporaryPassword));
 
         employee = this.saveOrUpdate(employee);
       employee = this.saveOrUpdate(employee);
