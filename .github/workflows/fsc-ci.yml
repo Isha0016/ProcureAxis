@@ -54,6 +54,8 @@ jobs:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/fsc_ci
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: postgres
+          SPRING_FLYWAY_ENABLED: "true"
+          SPRING_FLYWAY_LOCATIONS: classpath:db/migration
           MAIL_USERNAME: ci@example.local
           MAIL_PASSWORD: ci-dummy-password
         run: mvn -B clean verify
