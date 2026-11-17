@@ -11,4 +11,6 @@ public interface EmployeeRepo extends JpaRepository<Employee, UUID> {
 
     public Employee findByWorkEmail(String email);
 
+    Employee findByEmployeeCode(String employeeCode);
+
 }

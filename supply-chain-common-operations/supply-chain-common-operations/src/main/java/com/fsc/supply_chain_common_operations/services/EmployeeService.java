@@ -64,50 +64,34 @@ public class EmployeeService implements EntityService<Employee> {
     }
 
     public Employee createMaintUserForCompany(Company company, CompanyType companyType) {
+        return createMaintUserForCompanyWithCredentials(company, companyType).employee();
+    }
+
+    public MaintUserCreationResult createMaintUserForCompanyWithCredentials(
+            Company company,
+            CompanyType companyType) {
+
         company.setCompanyType(companyType);
         company = companyRepo.save(company);
 
-        log.info("Starting main user creation. companyId={}, companyType={}",
-                company.getSysId(), companyType);
-
-        // Create main/admin role for the company
-        log.info("Creating main role. companyId={}, companyType={}",
-                company.getSysId(), companyType);
-
         Role maintRole = roleService.createMaintRole(company, companyType);
 
-        log.info("Main role created successfully. companyId={}, roleId={}",
-                company.getSysId(), maintRole.getSysId());
-
-        // Generate password and map company details to first employee
         String generatedPassword = SystemUtility.generatePassword(10);
 
         Employee maintEmployee =
                 EntityTransformer.mapCompanyToEmployee(company, generatedPassword);
 
-        maintEmployee.setPasswordHash(passwordEncoder.encode(generatedPassword));
-
-        log.debug("Company mapped to main employee successfully. companyId={}",
-                company.getSysId());
-
-        // Assign main/admin role
         maintEmployee.setRoles(List.of(maintRole));
 
-        log.debug("Main role assigned to employee. companyId={}, roleId={}",
-                company.getSysId(), maintRole.getSysId());
-
-        // Save employee
         maintEmployee = this.saveOrUpdate(maintEmployee);
 
-        log.info("Main employee created successfully. companyId={}, employeeId={}",
-                company.getSysId(), maintEmployee.getSysId());
-
-        // TODO: Send account creation notification to employee.
-        log.info("Main user creation completed successfully. companyId={}, employeeId={}",
-                company.getSysId(), maintEmployee.getSysId());
-
-        return maintEmployee;
+        return new MaintUserCreationResult(maintEmployee, generatedPassword);
     }
+
+    public record MaintUserCreationResult(
+            Employee employee,
+            String temporaryPassword
+    ) {}
 
     public Employee getEmployeeBySysId(UUID sysId){
         return employeeRepo.findById(sysId).orElse(null);
@@ -284,5 +268,24 @@ public class EmployeeService implements EntityService<Employee> {
         employee.setManager(manager);
 
         return employeeRepo.save(employee);
+    }
+
+    public Employee getEmployeeByCode(String employeeCode){
+        return employeeRepo.findByEmployeeCode(employeeCode);
+    }
+
+
+
+    public void resetSupplierPassword(String email, String newPassword) {
+
+        Employee employee = employeeRepo.findByWorkEmail(email);
+
+        if (employee == null) {
+            throw new RuntimeException("Supplier employee not found" );
+        }
+
+        employee.setPasswordHash(passwordEncoder.encode(newPassword));
+
+        employeeRepo.save(employee);
     }
 }

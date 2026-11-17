@@ -66,7 +66,7 @@ public class InternalAdminBootstrap {
         }
 
         Employee existingEmployee =
-                employeeService.getEmployeeByEmail(adminEmail);
+                employeeService.getEmployeeByCode("FSC-ADMIN-001");
 
         if (existingEmployee != null) {
             if (existingEmployee.getUserStatus() != UserStatus.ACTIVE) {
