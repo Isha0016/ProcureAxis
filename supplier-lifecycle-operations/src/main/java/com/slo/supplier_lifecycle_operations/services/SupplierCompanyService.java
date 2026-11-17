@@ -111,9 +111,14 @@ public class SupplierCompanyService {
         log.info("Creating main employee for supplier company. companyId={}",
                 supplierCompany.getSysId());
 
-        Employee maintEmployee = employeeService.createMaintUserForCompany(
-                supplierCompany,
-                CompanyType.SUPPLIER_COMPANY);
+        EmployeeService.MaintUserCreationResult userCreation =
+                employeeService.createMaintUserForCompanyWithCredentials(
+                        supplierCompany,
+                        CompanyType.SUPPLIER_COMPANY
+                );
+
+        Employee maintEmployee = userCreation.employee();
+        String temporaryPassword = userCreation.temporaryPassword();
 
         log.info("Main employee created successfully. companyId={}, employeeId={}",
                 supplierCompany.getSysId(),
@@ -130,7 +135,7 @@ public class SupplierCompanyService {
         emailMap.put("maintUserName", maintEmployee.getFirstName());
         emailMap.put("companyName", supplierCompany.getCompanyName());
         emailMap.put("maintUserEmail", maintEmployee.getEmailAddress());
-        emailMap.put("temporaryPassword", maintEmployee.getPasswordHash());
+        emailMap.put("temporaryPassword", temporaryPassword);
         emailMap.put("applicationUrl", "https://www.google.com");
         emailMap.put("currentYear", String.valueOf(LocalDate.now().getYear()));
 
