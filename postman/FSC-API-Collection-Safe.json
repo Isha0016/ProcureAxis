@@ -1,0 +1,2228 @@
+{
+  "info": {
+    "_postman_id": "58f05784-6b54-4ac3-82f9-51d7fe2994fe",
+    "name": "FSC Backend End-to-End Demo",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49628063",
+    "_collection_link": "https://go.postman.co/collection/49628063-58f05784-6b54-4ac3-82f9-51d7fe2994fe?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Authentication and onboarding",
+      "item": [
+        {
+          "name": "Register Supplier A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {\r\n    const response = pm.response.json();\r\n\r\n    // Save Supplier A details\r\n    pm.collectionVariables.set(\"supplier_a_company_id\", response.sysId);\r\n    pm.collectionVariables.set(\"supplier_a_email\", \"supplier.I@demo.local\");\r\n\r\n    console.log(\"Supplier A registered successfully\");\r\n    console.log(\"Supplier A response:\", response);\r\n} else {\r\n    console.log(\"Supplier A registration failed:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"supplierCategory\":\"RAW_MATERIALS\",\"leadTimeDays\":7,\"minimumOrderValue\":10000,\"companyName\":\"Demo Supplier I\",\"legalName\":\"Demo Supplier I Private Limited\",\"gstNumber\":\"29ABCDE1234F1Z5\",\"panNumber\":\"ABCDE1234F\",\"emailAddress\":\"supplier.I@demo.local\",\"website\":\"https://supplier-a.example.com\",\"contactNumber\":\"9876543210\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8083/api/v1/slo/company/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "slo",
+                "company",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register Supplier B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {\r\n    const response = pm.response.json();\r\n\r\n    // Save Supplier B details\r\n    pm.collectionVariables.set(\"supplier_b_company_id\", response.sysId);\r\n    pm.collectionVariables.set(\"supplier_b_email\", \"supplier.II@f10demo.local\");\r\n\r\n    console.log(\"Supplier B registered successfully\");\r\n    console.log(\"Supplier B response:\", response);\r\n} else {\r\n    console.log(\"Supplier B registration failed:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"supplierCategory\":\"RAW_MATERIALS\",\"leadTimeDays\":20,\"minimumOrderValue\":7000,\"companyName\":\" Demo Supplier II\",\"legalName\":\" Demo Supplier II Private Limited\",\"gstNumber\":\"02FGHIJ5678K1Z6\",\"panNumber\":\"FGHIJ5678K\",\"emailAddress\":\"supplier.II@f10demo.local\",\"website\":\"https://supplier-b.example.com\",\"contactNumber\":\"9876543211\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8083/api/v1/slo/company/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "slo",
+                "company",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Activate Supplier A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 204) {\r\n    pm.collectionVariables.set(\"supplier_a_activated\", \"true\");\r\n    pm.collectionVariables.set(\"supplier_a_password\", \"Supplier I\");\r\n\r\n    console.log(\"Supplier A activated successfully\");\r\n} else {\r\n    console.log(\"Supplier A activation failed\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(\"Response:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"token\":\"REPLACE_WITH_YOUR_CREDENTIAL\",\"newPassword\":\"REPLACE_WITH_YOUR_CREDENTIAL\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8083/api/v1/common/emp/activate",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "common",
+                "emp",
+                "activate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Activate Supplier B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 204) {\r\n    pm.collectionVariables.set(\"supplier_b_activated\", \"true\");\r\n    pm.collectionVariables.set(\"supplier_b_password\", \"Supplier II\");\r\n\r\n    console.log(\"Supplier B activated successfully\");\r\n} else {\r\n    console.log(\"Supplier B activation failed\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(\"Response:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"token\":\"REPLACE_WITH_YOUR_CREDENTIAL\",\"newPassword\":\"REPLACE_WITH_YOUR_CREDENTIAL\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8083/api/v1/common/emp/activate",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "common",
+                "emp",
+                "activate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Supplier A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {\r\n    const response = pm.response.json();\r\n\r\n    pm.collectionVariables.set(\"supplier_a_token\", response.token);\r\n\r\n    console.log(\"Supplier A login successful. Token saved.\");\r\n} else {\r\n    console.log(\"Supplier A login failed:\", pm.response.code);\r\n    console.log(pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"supplier.I@demo.local\",\"password\":\"REPLACE_WITH_YOUR_CREDENTIAL\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8083/api/v1/common/emp/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "common",
+                "emp",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Supplier B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {\r\n    const response = pm.response.json();\r\n\r\n    pm.collectionVariables.set(\"supplier_b_token\", response.token);\r\n\r\n    console.log(\"Supplier B login successful. Token saved.\");\r\n} else {\r\n    console.log(\"Supplier B login failed:\", pm.response.code);\r\n    console.log(pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"supplier.II@f10demo.local\",\"password\":\"REPLACE_WITH_YOUR_CREDENTIAL\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8083/api/v1/common/emp/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "common",
+                "emp",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Internal Admin login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {\r\n    const response = pm.response.json();\r\n    pm.collectionVariables.set(\"admin_token\", response.token);\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"fsc.admin@demo.local\",\"password\":\"REPLACE_WITH_YOUR_CREDENTIAL\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8083/api/v1/common/emp/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "common",
+                "emp",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register Procurement Company",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Procurement company registered successfully\", function () {\r\n    pm.expect(pm.response.text()).to.include(\r\n        \"Procurement company registered successfully\"\r\n    );\r\n});\r\n\r\nif (pm.response.code === 201) {\r\n    pm.collectionVariables.set(\r\n        \"procurement_company_registered\",\r\n        \"true\"\r\n    );\r\n\r\n    console.log(\"Procurement company registered successfully!\");\r\n    console.log(\"Response:\", pm.response.text());\r\n} else {\r\n    pm.collectionVariables.set(\r\n        \"procurement_company_registered\",\r\n        \"false\"\r\n    );\r\n\r\n    console.log(\"Registration failed!\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(\"Error:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"companyName\":\"Demo Procurement Company I\",\"legalName\":\"Demo Procurement Company Private Limited I\",\"gstNumber\":\"29FGHIJ1234K1Z5\",\"panNumber\":\"FGHIJ1234K\",\"emailAddress\":\"procurement.I@example.com\",\"website\":\"https://procurement-I.example.com\",\"contactNumber\":\"9876543212\",\"fiscalYearStartMonth\":4,\"approvalRequired\":true}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/procurement-companies/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "procurement-companies",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Activate Procurement Employee I",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 204 No Content\", function () {\r\n    pm.response.to.have.status(204);\r\n});\r\n\r\nif (pm.response.code === 204) {\r\n    pm.collectionVariables.set(\r\n        \"procurement_employee_activated\",\r\n        \"true\"\r\n    );\r\n\r\n    console.log(\"Procurement employee activated successfully!\");\r\n    console.log(\"You can now proceed with procurement employee login.\");\r\n} else {\r\n    pm.collectionVariables.set(\r\n        \"procurement_employee_activated\",\r\n        \"false\"\r\n    );\r\n\r\n    console.log(\"Procurement employee activation failed!\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(\"Response:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"token\":\"REPLACE_WITH_YOUR_CREDENTIAL\",\"newPassword\":\"REPLACE_WITH_YOUR_CREDENTIAL\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/v1/common/emp/activate",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "common",
+                "emp",
+                "activate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Procurement Employee I",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nif (pm.response.code === 200) {\r\n    const response = pm.response.json();\r\n\r\n    pm.collectionVariables.set(\r\n        \"procurement_token\",\r\n        response.token\r\n    );\r\n\r\n    console.log(\"Procurement employee login successful!\");\r\n    console.log(\"Procurement token saved successfully.\");\r\n} else {\r\n    console.log(\"Procurement employee login failed!\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(\"Error:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"procurement.I@example.com\",\"password\":\"REPLACE_WITH_YOUR_CREDENTIAL\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/v1/common/emp/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "common",
+                "emp",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Procurement Approval Manager",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\nif (pm.response.code === 201) {\r\n    const response = pm.response.json();\r\n\r\n    // Save manager role ID\r\n    if (response.sysId) {\r\n        pm.collectionVariables.set(\r\n            \"procurement_manager_role_id\",\r\n            response.sysId\r\n        );\r\n    } else if (response.id) {\r\n        pm.collectionVariables.set(\r\n            \"procurement_manager_role_id\",\r\n            response.id\r\n        );\r\n    }\r\n\r\n    pm.collectionVariables.set(\r\n        \"procurement_manager_role_created\",\r\n        \"true\"\r\n    );\r\n\r\n    console.log(\"Procurement approval manager role created successfully!\");\r\n    console.log(\"Role ID:\", response.sysId || response.id);\r\n    console.log(\"Role Details:\", response);\r\n\r\n} else {\r\n    pm.collectionVariables.set(\r\n        \"procurement_manager_role_created\",\r\n        \"false\"\r\n    );\r\n\r\n    console.log(\"Manager role creation failed!\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(\"Error:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_178c}}",
+                "description": "Procurement Comp I"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"companySysId\":\"3d7dd54b-8faa-4692-a122-669af467a331\",\"roleName\":\"PROCUREMENT_APPROVAL_MANAGER\",\"operationName\":[\"APPROVE_PURCHASE_REQUEST\",\"VIEW_PURCHASE_REQUEST\"]}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/v1/common/role/create",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "common",
+                "role",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Invite Procurement Approval Manager",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\nif (pm.response.code === 201) {\r\n    pm.collectionVariables.set(\r\n        \"procurement_manager_invited\",\r\n        \"true\"\r\n    );\r\n\r\n    pm.collectionVariables.set(\r\n        \"procurement_manager_email\",\r\n        \"procurement.manager@example.com\"\r\n    );\r\n\r\n    console.log(\"Procurement Approval Manager invited successfully!\");\r\n    console.log(\"Manager email:\", \"procurement.manager@example.com\");\r\n    console.log(\"Invitation status: SUCCESS\");\r\n    console.log(\"Check Mailpit for the activation email.\");\r\n\r\n} else {\r\n    pm.collectionVariables.set(\r\n        \"procurement_manager_invited\",\r\n        \"false\"\r\n    );\r\n\r\n    console.log(\"Manager invitation failed!\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(\"Response:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_11vj}}",
+                "description": "Admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"companySysId\":\"3d7dd54b-8faa-4692-a122-669af467a331\",\"managerSysId\":null,\"department\":\"Procurement\",\"designation\":\"Procurement Manager\",\"joiningDate\":\"2026-11-19\",\"probationEndDate\":\"2027-02-19\",\"employmentType\":\"FULL_TIME\",\"workEmail\":\"procurement.manager@example.com\",\"workPhone\":\"9876543213\",\"firstName\":\"Procurement\",\"lastName\":\"Manager\",\"emailAddress\":\"procurement.manager@example.com\",\"phoneNumber\":\"9876543213\",\"roleSysIds\":[\"734abcb5-20eb-4b86-af8a-f242d1497bba\"],\"officeLocation\":\"Bangalore\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/v1/common/emp/invite-employee",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "common",
+                "emp",
+                "invite-employee"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Activate Procurement Approval Manager",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 204 No Content\", function () {\r\n    pm.response.to.have.status(204);\r\n});\r\n\r\nif (pm.response.code === 204) {\r\n    pm.collectionVariables.set(\r\n        \"procurement_manager_activated\",\r\n        \"true\"\r\n    );\r\n\r\n    console.log(\"Procurement Approval Manager activated successfully!\");\r\n    console.log(\"Manager account is ready for login.\");\r\n} else {\r\n    pm.collectionVariables.set(\r\n        \"procurement_manager_activated\",\r\n        \"false\"\r\n    );\r\n\r\n    console.log(\"Manager activation failed!\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(\"Response:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"token\":\"REPLACE_WITH_YOUR_CREDENTIAL\",\"newPassword\":\"REPLACE_WITH_YOUR_CREDENTIAL\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/v1/common/emp/activate",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "common",
+                "emp",
+                "activate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Procurement Approval Manager",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nif (pm.response.code === 200) {\r\n    const response = pm.response.json();\r\n\r\n    pm.collectionVariables.set(\r\n        \"procurement_manager_token\",\r\n        response.token\r\n    );\r\n\r\n    console.log(\"Procurement Manager login successful!\");\r\n    console.log(\"Manager token saved successfully.\");\r\n\r\n} else {\r\n    console.log(\"Manager login failed!\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(\"Response:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"procurement.manager@example.com\",\"password\":\"REPLACE_WITH_YOUR_CREDENTIAL\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/v1/common/emp/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "common",
+                "emp",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Company approvals",
+      "item": [
+        {
+          "name": "Review Supplier A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {\r\n    const response = pm.response.json();\r\n\r\n    pm.collectionVariables.set(\r\n        \"supplier_a_status\",\r\n        response.status\r\n    );\r\n\r\n    console.log(\"Supplier A review started successfully\");\r\n    console.log(\"Company response:\", response);\r\n} else {\r\n    console.log(\"Review failed:\", pm.response.code);\r\n    console.log(pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_1ci6}}",
+                "description": "Admin"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8083/api/v1/slo/company/47a1a6d3-5af3-44a6-ae68-d97bd1b56010/review",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "slo",
+                "company",
+                "47a1a6d3-5af3-44a6-ae68-d97bd1b56010",
+                "review"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Supplier A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {\r\n    console.log(\"Supplier A approved successfully\");\r\n    console.log(\"Updated company:\", pm.response.json());\r\n} else {\r\n    console.log(\"Approval failed:\", pm.response.code);\r\n    console.log(pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_0zk0}}",
+                "description": "Admin"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8083/api/v1/slo/company/47a1a6d3-5af3-44a6-ae68-d97bd1b56010/approve",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "slo",
+                "company",
+                "47a1a6d3-5af3-44a6-ae68-d97bd1b56010",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Review Supplier B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {\r\n    console.log(\"Supplier B review started successfully\");\r\n    console.log(pm.response.json());\r\n} else {\r\n    console.log(\"Review failed:\", pm.response.code);\r\n    console.log(pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_07o4}}",
+                "description": "Admin"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8083/api/v1/slo/company/b10c1167-b3b8-44ff-97f0-854cd571043c/review",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "slo",
+                "company",
+                "b10c1167-b3b8-44ff-97f0-854cd571043c",
+                "review"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Supplier B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {\r\n    console.log(\"Supplier B approved successfully\");\r\n    console.log(\"Updated company:\", pm.response.json());\r\n} else {\r\n    console.log(\"Approval failed:\", pm.response.code);\r\n    console.log(pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_14bq}}",
+                "description": "Admin"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8083/api/v1/slo/company/b10c1167-b3b8-44ff-97f0-854cd571043c/approve",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "slo",
+                "company",
+                "b10c1167-b3b8-44ff-97f0-854cd571043c",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Supplier A Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_0tdr}}",
+                "description": "Admin"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8083/api/v1/slo/company/47a1a6d3-5af3-44a6-ae68-d97bd1b56010",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "slo",
+                "company",
+                "47a1a6d3-5af3-44a6-ae68-d97bd1b56010"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Supplier B Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_1b01}}-",
+                "description": "Admin"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8083/api/v1/slo/company/b10c1167-b3b8-44ff-97f0-854cd571043c",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "slo",
+                "company",
+                "b10c1167-b3b8-44ff-97f0-854cd571043c"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Procurement Comp I",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nif (pm.response.code === 200) {\r\n    const response = pm.response.json();\r\n\r\n    pm.collectionVariables.set(\r\n        \"procurement_company_approved\",\r\n        \"true\"\r\n    );\r\n\r\n    pm.collectionVariables.set(\r\n        \"procurement_company_status\",\r\n        \"ACTIVE\"\r\n    );\r\n\r\n    console.log(\"Procurement company approved successfully!\");\r\n    console.log(\"Updated company details:\", response);\r\n    console.log(\"Company status: ACTIVE\");\r\n} else {\r\n    pm.collectionVariables.set(\r\n        \"procurement_company_approved\",\r\n        \"false\"\r\n    );\r\n\r\n    console.log(\"Procurement company approval failed!\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(\"Response:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_0k9d}}-",
+                "description": "Admin"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"decision\":\"APPROVE\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/procurement-companies/3d7dd54b-8faa-4692-a122-669af467a331/review",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "procurement-companies",
+                "3d7dd54b-8faa-4692-a122-669af467a331",
+                "review"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Product Catalogs",
+      "item": [
+        {
+          "name": "Create Product Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {\r\n    const response = pm.response.json();\r\n    console.log(\"Category created:\", response);\r\n\r\n    // Confirm the actual ID field in the response before saving it.\r\n    if (response.sysId) {\r\n        pm.collectionVariables.set(\"category_id\", response.sysId);\r\n    }\r\n} else {\r\n    console.log(\"Category creation failed:\", pm.response.code);\r\n    console.log(pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_18hl}}",
+                "description": "Admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"categoryCode\":\"ELECTRONICS\",\"categoryName\":\"Electronics\",\"description\":\"Electronic products and equipment\",\"parentCategorySysId\":null,\"displayOrder\":1,\"imageUrl\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8083/api/v1/slo/product-categories",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "slo",
+                "product-categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Product A (Supplier A)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {\r\n    const response = pm.response.json();\r\n\r\n    console.log(\"Product A created successfully!\");\r\n    console.log(\"Product response:\", response);\r\n\r\n    // Save Product A ID\r\n    if (response.sysId) {\r\n        pm.collectionVariables.set(\"supplier_a_product_id\", response.sysId);\r\n    }\r\n\r\n    pm.collectionVariables.set(\"supplier_a_product_created\", \"true\");\r\n\r\n} else {\r\n    console.log(\"Product A creation failed!\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(\"Error:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_0qm6}}",
+                "description": "Supplier A"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"productCode\":\"F10-SUPA-LAPTOP-001\",\"productName\":\"Dell Latitude Business Laptop\",\"description\":\"Business laptop for enterprise procurement\",\"categorySysId\":\"cf1d8f85-82a4-4988-b98a-69830df1e911\",\"productType\":\"FINISHED_GOOD\",\"unitOfMeasure\":\"PIECE\",\"brand\":\"Dell\",\"manufacturer\":\"Dell Technologies\",\"modelNumber\":\"Latitude-5450\",\"imageUrl\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8083/api/v1/slo/products",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "slo",
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Product B (Supplier B)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {\r\n    const response = pm.response.json();\r\n\r\n    console.log(\"Product B created successfully!\");\r\n    console.log(\"Product B response:\", response);\r\n\r\n    // Save Product B ID\r\n    if (response.sysId) {\r\n        pm.collectionVariables.set(\"supplier_b_product_id\", response.sysId);\r\n    }\r\n\r\n    pm.collectionVariables.set(\"supplier_b_product_created\", \"true\");\r\n\r\n} else {\r\n    console.log(\"Product B creation failed!\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(\"Error:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_1a0h}}",
+                "description": "Supplier B"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"productCode\":\"F10-SUPB-KEYBOARD-001\",\"productName\":\"Wireless Keyboard Pro\",\"description\":\"Wireless keyboard for office and business use\",\"categorySysId\":\"cf1d8f85-82a4-4988-b98a-69830df1e911\",\"productType\":\"FINISHED_GOOD\",\"unitOfMeasure\":\"PIECE\",\"brand\":\"WK\",\"manufacturer\":\"Wire Technologies\",\"modelNumber\":\"WK-100\",\"imageUrl\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8083/api/v1/slo/products",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "slo",
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Supplier A's Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_0br8}}",
+                "description": "Supplier A"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8083/api/v1/slo/products/my-products",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "slo",
+                "products",
+                "my-products"
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Supplier B's Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_0h88}}",
+                "description": "Supplier B"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8083/api/v1/slo/products/my-products",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "slo",
+                "products",
+                "my-products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Activate Product A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {\r\n    const response = pm.response.json();\r\n\r\n    console.log(\"Product A activated successfully!\");\r\n    console.log(\"Updated product:\", response);\r\n\r\n    pm.collectionVariables.set(\"supplier_a_product_status\", \"ACTIVE\");\r\n} else {\r\n    console.log(\"Product A activation failed!\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_0d19}}",
+                "description": "Supplier A"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":\"ACTIVE\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8083/api/v1/slo/products/152612c5-0e87-4f84-8d87-70d504835a3c/status",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "slo",
+                "products",
+                "152612c5-0e87-4f84-8d87-70d504835a3c",
+                "status"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Activate Product B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {\r\n    const response = pm.response.json();\r\n\r\n    console.log(\"Product B activated successfully!\");\r\n    console.log(\"Updated Product B:\", response);\r\n\r\n    pm.collectionVariables.set(\"supplier_b_product_status\", \"ACTIVE\");\r\n    pm.collectionVariables.set(\"supplier_b_product_activated\", \"true\");\r\n\r\n} else {\r\n    console.log(\"Product B activation failed!\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(\"Error:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_0u86}}",
+                "description": "Supplier B"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":\"ACTIVE\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8083/api/v1/slo/products/4194eb0b-5583-4ed1-81e8-8a3a9875328e/status",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "slo",
+                "products",
+                "4194eb0b-5583-4ed1-81e8-8a3a9875328e",
+                "status"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Browse Active Products",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {\r\n    const response = pm.response.json();\r\n\r\n    console.log(\"Active product catalog retrieved successfully!\");\r\n    console.log(\"Products:\", response.content);\r\n\r\n    pm.collectionVariables.set(\"active_products_count\", response.totalElements);\r\n} else {\r\n    console.log(\"Product catalog request failed!\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_0cz0}}",
+                "description": "Procurement Company I"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8083/api/v1/slo/products/browse",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "v1",
+                "slo",
+                "products",
+                "browse"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Purchase requests",
+      "item": [
+        {
+          "name": "Create Purchase Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\nif (pm.response.code === 201) {\r\n    const response = pm.response.json();\r\n\r\n    // Save Purchase Request ID\r\n    if (response.sysId) {\r\n        pm.collectionVariables.set(\r\n            \"purchase_request_id\",\r\n            response.sysId\r\n        );\r\n    }\r\n\r\n    // Save Purchase Request Number\r\n    if (response.requestNumber) {\r\n        pm.collectionVariables.set(\r\n            \"purchase_request_number\",\r\n            response.requestNumber\r\n        );\r\n    }\r\n\r\n    // Save current status\r\n    if (response.requestStatus) {\r\n        pm.collectionVariables.set(\r\n            \"purchase_request_status\",\r\n            response.requestStatus\r\n        );\r\n    }\r\n\r\n    pm.collectionVariables.set(\r\n        \"purchase_request_created\",\r\n        \"true\"\r\n    );\r\n\r\n    console.log(\"Purchase Request created successfully!\");\r\n    console.log(\"Request ID:\", response.sysId);\r\n    console.log(\"Request Number:\", response.requestNumber);\r\n    console.log(\"Status:\", response.requestStatus);\r\n    console.log(\"Estimated Total:\", response.estimatedTotalAmount);\r\n    console.log(\"Request Lines:\", response.requestLines);\r\n\r\n} else {\r\n    pm.collectionVariables.set(\r\n        \"purchase_request_created\",\r\n        \"false\"\r\n    );\r\n\r\n    console.log(\"Purchase Request creation failed!\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(\"Error:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "token",
+                "value": "{{json_web_token_0z0v}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Office Laptop Purchase\",\"description\":\"Purchase request for business laptops for office employees\",\"priority\":\"HIGH\",\"requiredDate\":\"2026-12-15\",\"deliveryLocation\":\"Bangalore, India\",\"currencyCode\":\"INR\",\"budgetCode\":\"IT-2026\",\"purchaseRequestType\":\"GOODS\",\"procurementType\":\"COMPETITIVE_SOURCING\",\"requestLines\":[{\"productId\":\"152612c5-0e87-4f84-8d87-70d504835a3c\",\"quantity\":5,\"estimatedUnitPrice\":55000,\"notes\":\"Five business laptops required\"}]}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/v1/spo/purchase-requests",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "spo",
+                "purchase-requests"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Assign Procurement Approval Manager",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nif (pm.response.code === 200) {\r\n\r\n    pm.collectionVariables.set(\r\n        \"procurement_manager_assigned\",\r\n        \"true\"\r\n    );\r\n\r\n    console.log(\"Procurement approval manager assigned successfully!\");\r\n    console.log(\r\n        \"Procurement Employee ID:\",\r\n        pm.collectionVariables.get(\"procurement_employee_id\")\r\n    );\r\n\r\n    console.log(\r\n        \"Manager Employee ID:\",\r\n        pm.collectionVariables.get(\"procurement_manager_employee_id\")\r\n    );\r\n\r\n    console.log(\"Manager assignment status: SUCCESS\");\r\n\r\n} else {\r\n\r\n    pm.collectionVariables.set(\r\n        \"procurement_manager_assigned\",\r\n        \"false\"\r\n    );\r\n\r\n    console.log(\"Manager assignment failed!\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(\"Response:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_0617}}",
+                "description": "Admin"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"managerSysId\":\"fd6338f8-5664-4e18-a60a-7fdd3d510f39\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/v1/common/emp/2d9d5c5a-945d-4657-bebe-14e2762e9f19/manager",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "common",
+                "emp",
+                "2d9d5c5a-945d-4657-bebe-14e2762e9f19",
+                "manager"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Purchase Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nif (pm.response.code === 200) {\r\n\r\n    pm.collectionVariables.set(\r\n        \"purchase_request_submitted\",\r\n        \"true\"\r\n    );\r\n\r\n    let response = {};\r\n\r\n    try {\r\n        response = pm.response.json();\r\n    } catch (e) {\r\n        console.log(\"Response is not JSON:\", pm.response.text());\r\n    }\r\n\r\n    if (response.sysId) {\r\n        pm.collectionVariables.set(\r\n            \"purchase_request_id\",\r\n            response.sysId\r\n        );\r\n    }\r\n\r\n    if (response.requestNumber) {\r\n        pm.collectionVariables.set(\r\n            \"purchase_request_number\",\r\n            response.requestNumber\r\n        );\r\n    }\r\n\r\n    if (response.requestStatus) {\r\n        pm.collectionVariables.set(\r\n            \"purchase_request_status\",\r\n            response.requestStatus\r\n        );\r\n    }\r\n\r\n    console.log(\"Purchase Request submitted successfully!\");\r\n    console.log(\"Purchase Request ID:\", response.sysId);\r\n    console.log(\"Request Number:\", response.requestNumber);\r\n    console.log(\"Status:\", response.requestStatus);\r\n\r\n} else {\r\n\r\n    pm.collectionVariables.set(\r\n        \"purchase_request_submitted\",\r\n        \"false\"\r\n    );\r\n\r\n    console.log(\"Purchase Request submission failed!\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(\"Error:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_0cfx}}",
+                "description": "Procurement comp I"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8081/api/v1/spo/purchase-requests/92501698-3028-4a58-8879-6e56fac7e95f/submit",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "spo",
+                "purchase-requests",
+                "92501698-3028-4a58-8879-6e56fac7e95f",
+                "submit"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Purchase Request",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Sourcing",
+      "item": [
+        {
+          "name": "Create Sourcing Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\nif (pm.response.code === 201) {\r\n    const response = pm.response.json();\r\n\r\n    if (response.sysId) {\r\n        pm.collectionVariables.set(\r\n            \"sourcing_request_id\",\r\n            response.sysId\r\n        );\r\n    }\r\n\r\n    if (response.requestNumber) {\r\n        pm.collectionVariables.set(\r\n            \"sourcing_request_number\",\r\n            response.requestNumber\r\n        );\r\n    }\r\n\r\n    if (response.requestStatus) {\r\n        pm.collectionVariables.set(\r\n            \"sourcing_request_status\",\r\n            response.requestStatus\r\n        );\r\n    }\r\n\r\n    pm.collectionVariables.set(\r\n        \"sourcing_request_created\",\r\n        \"true\"\r\n    );\r\n\r\n    console.log(\"Sourcing Request created successfully!\");\r\n    console.log(\"Sourcing Request ID:\", response.sysId);\r\n    console.log(\"Request Number:\", response.requestNumber);\r\n    console.log(\"Status:\", response.requestStatus);\r\n\r\n} else {\r\n    pm.collectionVariables.set(\r\n        \"sourcing_request_created\",\r\n        \"false\"\r\n    );\r\n\r\n    console.log(\"Sourcing Request creation failed!\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(\"Error:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_1aka}}",
+                "description": "Procurement comp I"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\" Laptop Competitive Sourcing\",\"description\":\"Competitive sourcing for five business laptops\",\"sourcingMethod\":\"RFQ\",\"evaluationCriteria\":\"Price, quality, delivery time and warranty\",\"commercialTerms\":\"Payment as per agreed purchase terms\",\"responseDeadline\":\"2026-11-25T18:30:00Z\",\"evaluationDeadline\":\"2026-11-28T18:30:00Z\",\"supplierCompanyIds\":[\"47a1a6d3-5af3-44a6-ae68-d97bd1b56010\",\"b10c1167-b3b8-44ff-97f0-854cd571043c\"]}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/v1/spo/sourcing-requests/from-purchase-request/92501698-3028-4a58-8879-6e56fac7e95f",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "spo",
+                "sourcing-requests",
+                "from-purchase-request",
+                "92501698-3028-4a58-8879-6e56fac7e95f"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Sourcing Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nif (pm.response.code === 200) {\r\n    const response = pm.response.json();\r\n\r\n    pm.collectionVariables.set(\r\n        \"sourcing_request_submitted\",\r\n        \"true\"\r\n    );\r\n\r\n    if (response.sysId) {\r\n        pm.collectionVariables.set(\r\n            \"sourcing_request_id\",\r\n            response.sysId\r\n        );\r\n    }\r\n\r\n    if (response.requestStatus) {\r\n        pm.collectionVariables.set(\r\n            \"sourcing_request_status\",\r\n            response.requestStatus\r\n        );\r\n    }\r\n\r\n    console.log(\"Sourcing Request submitted successfully!\");\r\n    console.log(\"Sourcing Request ID:\", response.sysId);\r\n    console.log(\"Request Number:\", response.requestNumber);\r\n    console.log(\"Status:\", response.requestStatus);\r\n\r\n} else {\r\n    pm.collectionVariables.set(\r\n        \"sourcing_request_submitted\",\r\n        \"false\"\r\n    );\r\n\r\n    console.log(\"Sourcing Request submission failed!\");\r\n    console.log(\"Status:\", pm.response.code);\r\n    console.log(\"Error:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_1e5m}}",
+                "description": "Procurement Comp I"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8081/api/v1/spo/sourcing-requests/4ec5d41f-ecc9-449f-ac86-ca4816d4f80a/submit",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "spo",
+                "sourcing-requests",
+                "4ec5d41f-ecc9-449f-ac86-ca4816d4f80a",
+                "submit"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Sourcing Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nif (pm.response.code === 200) {\r\n    pm.collectionVariables.set(\"sourcing_request_approved\", \"true\");\r\n\r\n    let response = {};\r\n    try {\r\n        response = pm.response.json();\r\n    } catch (e) {\r\n        console.log(pm.response.text());\r\n    }\r\n\r\n    if (response.sysId) {\r\n        pm.collectionVariables.set(\"sourcing_request_id\", response.sysId);\r\n    }\r\n\r\n    if (response.requestStatus) {\r\n        pm.collectionVariables.set(\"sourcing_request_status\", response.requestStatus);\r\n    }\r\n\r\n    console.log(\"Sourcing Request approved successfully!\");\r\n} else {\r\n    pm.collectionVariables.set(\"sourcing_request_approved\", \"false\");\r\n    console.log(\"Approval failed:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_0zuq}}",
+                "description": "Procurement Manager"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8081/api/v1/spo/sourcing-requests/4ec5d41f-ecc9-449f-ac86-ca4816d4f80a/approve",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "spo",
+                "sourcing-requests",
+                "4ec5d41f-ecc9-449f-ac86-ca4816d4f80a",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Publish Sourcing Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nif (pm.response.code === 200) {\r\n    pm.collectionVariables.set(\"sourcing_request_published\", \"true\");\r\n\r\n    let response = {};\r\n    try {\r\n        response = pm.response.json();\r\n    } catch (e) {\r\n        console.log(pm.response.text());\r\n    }\r\n\r\n    if (response.sysId) {\r\n        pm.collectionVariables.set(\"sourcing_request_id\", response.sysId);\r\n    }\r\n\r\n    if (response.requestStatus) {\r\n        pm.collectionVariables.set(\"sourcing_request_status\", response.requestStatus);\r\n    }\r\n\r\n    console.log(\"Sourcing Request published successfully!\");\r\n} else {\r\n    pm.collectionVariables.set(\"sourcing_request_published\", \"false\");\r\n    console.log(\"Publish failed:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_1b7r}}",
+                "description": "Procurement Comp I"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8081/api/v1/spo/sourcing-requests/4ec5d41f-ecc9-449f-ac86-ca4816d4f80a/publish",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "spo",
+                "sourcing-requests",
+                "4ec5d41f-ecc9-449f-ac86-ca4816d4f80a",
+                "publish"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Supplier A - View Invited Sourcing Requests",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nif (pm.response.code === 200) {\r\n    const requests = pm.response.json();\r\n\r\n    const found = Array.isArray(requests) &&\r\n        requests.some(r => r.sysId === pm.collectionVariables.get(\"sourcing_request_id\"));\r\n\r\n    pm.test(\"Published sourcing request is visible to Supplier A\", function () {\r\n        pm.expect(found).to.be.true;\r\n    });\r\n\r\n    console.log(\"Supplier A invited requests:\", requests);\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_0xdh}}",
+                "description": "Supplier_A"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8081/api/v1/spo/sourcing-requests/invited",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "spo",
+                "sourcing-requests",
+                "invited"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Supplier A-View Sourcing Request Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nif (pm.response.code === 200) {\r\n    pm.collectionVariables.set(\"supplier_a_can_view_sourcing\", \"true\");\r\n    console.log(\"Supplier A can view the sourcing request.\");\r\n    console.log(\"Response:\", pm.response.json());\r\n} else {\r\n    pm.collectionVariables.set(\"supplier_a_can_view_sourcing\", \"false\");\r\n    console.log(\"Failed:\", pm.response.text());\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_06qm}}",
+                "description": "Supplier A"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8081/api/v1/spo/sourcing-requests/supplier/4ec5d41f-ecc9-449f-ac86-ca4816d4f80a",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "spo",
+                "sourcing-requests",
+                "supplier",
+                "4ec5d41f-ecc9-449f-ac86-ca4816d4f80a"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Bids and award",
+      "item": [
+        {
+          "name": "Supplier A- Create a Draft Bid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\nif (pm.response.code === 201) {\r\n    const response = pm.response.json();\r\n\r\n    pm.collectionVariables.set(\"supplier_a_bid_id\", response.sysId);\r\n    pm.collectionVariables.set(\"supplier_a_bid_number\", response.bidNumber);\r\n    pm.collectionVariables.set(\"supplier_a_bid_status\", response.bidStatus);\r\n\r\n    console.log(\"Supplier A bid created:\", response.bidNumber);\r\n    console.log(\"Bid ID:\", response.sysId);\r\n    console.log(\"Status:\", response.bidStatus);\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_0ltp}}",
+                "description": "Supplier A"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"validUntil\":\"2026-12-05\",\"deliveryLeadTimeDays\":15,\"paymentTerms\":\"Payment within 30 days of delivery\",\"deliveryTerms\":\"Delivery to Bangalore office\",\"technicalProposal\":\"Business laptop meeting the requested specifications\",\"commercialProposal\":\"Competitive pricing with one-year warranty\",\"remarks\":\"Supplier A draft quotation\",\"lines\":[{\"sourcingRequestLineSysId\":\"e7f98488-e2c6-402f-a82f-433fadb2bdf5\",\"quotedQuantity\":5,\"quotedUnitPrice\":52000,\"remarks\":\"Includes standard warranty\"}]}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/v1/spo/sourcing-requests/4ec5d41f-ecc9-449f-ac86-ca4816d4f80a/bids",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "spo",
+                "sourcing-requests",
+                "4ec5d41f-ecc9-449f-ac86-ca4816d4f80a",
+                "bids"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Supplier A-Get Draft Bid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Bid retrieved successfully\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nif (pm.response.code === 200) {\r\n    const r = pm.response.json();\r\n\r\n    pm.collectionVariables.set(\"supplier_a_bid_version\", r.version);\r\n\r\n    console.log(\"Bid ID:\", r.sysId);\r\n    console.log(\"Bid Number:\", r.bidNumber);\r\n    console.log(\"Status:\", r.bidStatus);\r\n    console.log(\"Version:\", r.version);\r\n    console.log(\"Total:\", r.totalBidAmount);\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_15ws}}",
+                "description": "Supplier A"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8081/api/v1/spo/bids/4196167a-dfd1-4282-93db-99e9b9e25293",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "spo",
+                "bids",
+                "4196167a-dfd1-4282-93db-99e9b9e25293"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Supplier A-Submit Bid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst response = pm.response.json();\r\n\r\npm.test(\"Bid submitted successfully\", function () {\r\n    pm.expect(response.bidStatus).to.eql(\"SUBMITTED\");\r\n});\r\n\r\npm.test(\"Submission date is generated\", function () {\r\n    pm.expect(response.submissionDate).to.not.be.null;\r\n});\r\n\r\npm.test(\"Bid ID is present\", function () {\r\n    pm.expect(response.sysId).to.not.be.empty;\r\n});\r\n\r\npm.test(\"Bid version is not null\", function () {\r\n    pm.expect(response.version).to.not.be.null;\r\n});\r\n\r\n// Save the latest bid version\r\nif (response.version !== null && response.version !== undefined) {\r\n    pm.environment.set(\"supplier_a_bid_version\", response.version);\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_0c0q}}",
+                "description": "Supplier A"
+              },
+              {
+                "key": "content-type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"expectedVersion\":0}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/v1/spo/bids/4196167a-dfd1-4282-93db-99e9b9e25293/submit",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "spo",
+                "bids",
+                "4196167a-dfd1-4282-93db-99e9b9e25293",
+                "submit"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Bids by Sourcing Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst response = pm.response.json();\r\n\r\npm.test(\"Comparison response is an array\", function () {\r\n    pm.expect(response).to.be.an(\"array\");\r\n});\r\n\r\npm.test(\"At least one eligible bid is available\", function () {\r\n    pm.expect(response.length).to.be.above(0);\r\n});\r\n\r\npm.test(\"All returned bids belong to this sourcing request\", function () {\r\n    const sourcingId = pm.environment.get(\"sourcing_request_id\");\r\n\r\n    response.forEach(function (bid) {\r\n        pm.expect(bid.sourcingRequestSysId).to.eql(sourcingId);\r\n    });\r\n});\r\n\r\npm.test(\"All returned bids are eligible for evaluation\", function () {\r\n    response.forEach(function (bid) {\r\n        pm.expect([\"UNDER_EVALUATION\", \"SUBMITTED\"])\r\n            .to.include(bid.bidStatus);\r\n    });\r\n});\r\n\r\npm.test(\"Supplier A bid is present\", function () {\r\n    const bidId = pm.environment.get(\"supplier_a_bid_id\");\r\n\r\n    pm.expect(\r\n        response.some(bid => bid.sysId === bidId)\r\n    ).to.eql(true);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_0il4}}",
+                "description": "Procurement comp I"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8081/api/v1/spo/sourcing-requests/4ec5d41f-ecc9-449f-ac86-ca4816d4f80a/bids",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "spo",
+                "sourcing-requests",
+                "4ec5d41f-ecc9-449f-ac86-ca4816d4f80a",
+                "bids"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Compare Bids",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst bids = pm.response.json();\r\n\r\npm.test(\"Comparison response is an array\", function () {\r\n    pm.expect(bids).to.be.an(\"array\");\r\n});\r\n\r\npm.test(\"At least one eligible bid is returned\", function () {\r\n    pm.expect(bids.length).to.be.above(0);\r\n});\r\n\r\npm.test(\"Supplier A bid is included\", function () {\r\n    const supplierABidId = pm.environment.get(\"supplier_a_bid_id\");\r\n\r\n    pm.expect(\r\n        bids.some(bid => bid.sysId === supplierABidId)\r\n    ).to.eql(true);\r\n});\r\n\r\npm.test(\"Returned bids belong to the correct sourcing request\", function () {\r\n    const sourcingRequestId = pm.environment.get(\"sourcing_request_id\");\r\n\r\n    bids.forEach(bid => {\r\n        pm.expect(bid.sourcingRequestSysId).to.eql(sourcingRequestId);\r\n    });\r\n});\r\n\r\npm.test(\"Returned bids have eligible statuses\", function () {\r\n    bids.forEach(bid => {\r\n        pm.expect([\"UNDER_EVALUATION\", \"SUBMITTED\"])\r\n            .to.include(bid.bidStatus);\r\n    });\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_0a5t}}",
+                "description": "Procurement comp I"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8081/api/v1/spo/sourcing-requests/4ec5d41f-ecc9-449f-ac86-ca4816d4f80a/comparison",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "spo",
+                "sourcing-requests",
+                "4ec5d41f-ecc9-449f-ac86-ca4816d4f80a",
+                "comparison"
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Award Bid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\npm.test(\"Status code is 201 Created\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Award ID is present\", function () {\r\n    pm.expect(response.sysId).to.exist;\r\n});\r\n\r\npm.test(\"Sourcing Request ID is correct\", function () {\r\n    pm.expect(response.sourcingRequestSysId).to.eql(\r\n        pm.variables.get(\"sourcing_request_id\")\r\n    );\r\n});\r\n\r\npm.test(\"Supplier A bid is awarded\", function () {\r\n    pm.expect(response.acceptedBidSysId).to.eql(\r\n        pm.variables.get(\"supplier_a_bid_id\")\r\n    );\r\n});\r\n\r\npm.test(\"Award reason is present\", function () {\r\n    pm.expect(response.reason).to.not.be.empty;\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_0il4}}",
+                "description": "Procurement comp I"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bidSysId\":\"4196167a-dfd1-4282-93db-99e9b9e25293\",\"expectedSourcingVersion\":0,\"reason\":\"Supplier A selected based on submitted pricing, delivery lead time and technical proposal.\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/v1/spo/sourcing-requests/4ec5d41f-ecc9-449f-ac86-ca4816d4f80a/award",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "spo",
+                "sourcing-requests",
+                "4ec5d41f-ecc9-449f-ac86-ca4816d4f80a",
+                "award"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Award",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "token",
+                "value": "{{json_web_token_0xe7}}",
+                "description": "Procurement comp I"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8081/api/v1/spo/sourcing-requests/4ec5d41f-ecc9-449f-ac86-ca4816d4f80a/award",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "v1",
+                "spo",
+                "sourcing-requests",
+                "4ec5d41f-ecc9-449f-ac86-ca4816d4f80a",
+                "award"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "admin_token",
+      "value": ""
+    },
+    {
+      "key": "supplier_b_company_id",
+      "value": ""
+    },
+    {
+      "key": "supplier_b_email",
+      "value": ""
+    },
+    {
+      "key": "supplier_b_activated",
+      "value": ""
+    },
+    {
+      "key": "supplier_b_password",
+      "value": ""
+    },
+    {
+      "key": "supplier_a_token",
+      "value": ""
+    },
+    {
+      "key": "supplier_b_token",
+      "value": ""
+    },
+    {
+      "key": "supplier_a_status",
+      "value": ""
+    },
+    {
+      "key": "json_web_token_1ci6",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_0zk0",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_07o4",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_14bq",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_0tdr",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_1b01",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_18hl",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_0qm6",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_1a0h",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_0br8",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_0h88",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_0d19",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_0u86",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "procurement_company_registered",
+      "value": ""
+    },
+    {
+      "key": "procurement_token",
+      "value": ""
+    },
+    {
+      "key": "json_web_token_0k9d",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "active_products_count",
+      "value": ""
+    },
+    {
+      "key": "json_web_token_0cz0",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_0z0v",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_178c",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_11vj",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_0617",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_0cfx",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "procurement_manager_token",
+      "value": ""
+    },
+    {
+      "key": "json_web_token_1aka",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_1e5m",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_0zuq",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_1b7r",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_0xdh",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_06qm",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_0ltp",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_15ws",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_0c0q",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_191x",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_0iyp",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_0a5t",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_0il4",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    },
+    {
+      "key": "json_web_token_0xe7",
+      "secret": "REPLACE_WITH_YOUR_CREDENTIAL"
+    }
+  ]
+}
