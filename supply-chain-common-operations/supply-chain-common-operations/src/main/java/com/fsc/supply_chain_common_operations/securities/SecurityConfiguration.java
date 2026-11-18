@@ -32,6 +32,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/v1/common/emp/login",
+                                "/api/v1/common/emp/activate",
                                 "/api/v1/slo/company/register",
                                 "/api/procurement-companies/register",
                                 "/error"

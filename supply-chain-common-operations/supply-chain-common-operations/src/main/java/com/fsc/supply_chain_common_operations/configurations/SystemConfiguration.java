@@ -17,18 +17,18 @@ public class SystemConfiguration {
     /**
      * Our api will use this email address to sending out the notification.
      */
-    //TODO - Get this credentials from .env file.
-    public String apiEmailAddress = "6206472735rahul@gmail.com";
+
+    //public String apiEmailAddress = "6206472735rahul@gmail.com";
 
 
-    public String apiEmailPassword = "ceffelhhjfderwei";
+    //public String apiEmailPassword = "ceffelhhjfderwei";
 
 
     /**
      * This function returns the object of JavaMailSender
      * @return
      */
-    @Bean
+    /*@Bean
     public JavaMailSender createJavaMailSender(){
         JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
         Properties mailProperties = new Properties();
@@ -45,7 +45,7 @@ public class SystemConfiguration {
         javaMailSender.setPassword(apiEmailPassword);
         return javaMailSender;
     }
-
+    */
     @Bean
     public ExecutorService createExecutorService() {
         return Executors.newFixedThreadPool(10);

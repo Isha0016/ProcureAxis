@@ -267,6 +267,7 @@ public class EmployeeService implements EntityService<Employee> {
         );
 
         emailMap.put("activationUrl", activationUrl);
+        emailMap.put("activationToken",activationToken);
         emailMap.put(
                 "currentYear",
                 String.valueOf(java.time.Year.now().getValue())
