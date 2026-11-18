@@ -50,6 +50,17 @@ public class AuthService {
                     "Wrong email or password entered"
             );
         }
+        if (!employee.isEmailVerified()
+
+                || employee.getUserStatus() != UserStatus.ACTIVE) {
+
+            throw new InvalidCredentialsException(
+
+                    "Please activate your account before logging in"
+
+            );
+
+        }
         employee.setLastLoginAt(Instant.now());
         employeeService.saveOrUpdate(employee);
         String token = jwtUtility.generateJwtToken(employee);

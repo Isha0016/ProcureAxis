@@ -21,7 +21,7 @@ public class EntityTransformer {
                 .lastName(company.getLegalName())
                 .emailAddress(company.getEmailAddress())
                 .phoneNumber(company.getContactNumber())
-                .passwordHash(passwordHash)
+                .passwordHash("UNACTIVATED")
                 .emailVerified(false)
                 .phoneVerified(false)
                 .userStatus(UserStatus.PENDING_VERIFICATION)

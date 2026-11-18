@@ -1,9 +1,6 @@
 package com.fsc.supply_chain_common_operations.controllers;
 
-import com.fsc.supply_chain_common_operations.dtos.requests.AssignEmployeeManagerRequest;
-import com.fsc.supply_chain_common_operations.dtos.requests.CreateRoleRequest;
-import com.fsc.supply_chain_common_operations.dtos.requests.EmployeeLoginRequest;
-import com.fsc.supply_chain_common_operations.dtos.requests.InviteEmployeeRequest;
+import com.fsc.supply_chain_common_operations.dtos.requests.*;
 import com.fsc.supply_chain_common_operations.dtos.responses.EmployeeLoginResponse;
 import com.fsc.supply_chain_common_operations.dtos.responses.ErrorResponse;
 import com.fsc.supply_chain_common_operations.exceptions.InvalidCredentialsException;
@@ -142,5 +139,16 @@ public class CommonController {
                     new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
             return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @PostMapping("/emp/activate")
+    public ResponseEntity<Void> activateEmployee(
+            @jakarta.validation.Valid
+            @RequestBody ActivateEmployeeRequest request
+    ) {
+
+        employeeService.activateEmployee(request);
+
+        return ResponseEntity.noContent().build();
     }
 }
