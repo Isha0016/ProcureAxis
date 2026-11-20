@@ -9,7 +9,8 @@ export const loginEmployee = async (email, password) => {
         }
     );
 
-    const token = response.data.token;
+    const data = response.data;
+    const token = data.token;
 
     if (!token) {
         throw new Error('Login response did not contain a token.');
@@ -17,5 +18,15 @@ export const loginEmployee = async (email, password) => {
 
     localStorage.setItem('token', token);
 
-    return response.data;
+    // Save login response for displaying the logged-in user's details.
+    localStorage.setItem('loggedInUser', JSON.stringify(data));
+
+    return data;
+};
+
+export const logoutEmployee = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('loggedInUser');
+
+    window.location.href = '/';
 };
