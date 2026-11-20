@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const spoApi = axios.create({
-    baseURL: 'http://localhost:8081',
+    baseURL: 'discerning-curiosity-production-ad1fdcd3.up.railway.app',
     headers: {
         'Content-Type': 'application/json'
     }
