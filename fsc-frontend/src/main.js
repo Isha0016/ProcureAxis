@@ -5,6 +5,10 @@ import { renderSupplierDashboard } from './pages/supplier.js';
 import { renderProcurementDashboard } from './pages/procurement.js';
 import { renderApprovalManagerDashboard } from './pages/approvalManager.js';
 import { renderInternalAdminDashboard } from "./pages/internalAdmin.js";
+import { renderSupplierRegistrationPage }from './pages/supplierRegistration.js';
+import { renderSupplierActivationPage} from "./pages/supplierActivation.js";
+import { renderProcurementRegistrationPage} from "./pages/ProcurementRegistration.js";
+import { renderProcurementActivationPage} from "./pages/procurementActivation.js";
 
 const app = document.querySelector('#app');
 
@@ -94,7 +98,7 @@ function renderLandingPage() {
     `;
 
     document.querySelector('#supplierPortalButton')
-        .addEventListener('click', () => renderLoginPage('supplier'));
+        .addEventListener('click', showSupplierRegistration);
 
     document.querySelector('#procurementPortalButton')
         .addEventListener('click', renderProcurementAccessPage);
@@ -163,7 +167,7 @@ function renderProcurementAccessPage() {
     `;
 
     document.querySelector('#procurementUserButton')
-        .addEventListener('click', () => renderLoginPage('procurement-user'));
+        .addEventListener('click', showProcurementRegistration);
 
     document.querySelector('#approvalManagerButton')
         .addEventListener('click', () => renderLoginPage('approval-manager'));
@@ -176,7 +180,7 @@ function renderProcurementAccessPage() {
 // LOGIN PAGE
 // -----------------------------
 
-function renderLoginPage(portal) {
+function renderLoginPage(portal , returnToRegistration=false) {
 
     const isSupplier = portal === 'supplier';
     const isApprovalManager = portal === 'approval-manager';
@@ -254,10 +258,18 @@ function renderLoginPage(portal) {
         </div>
     `;
 
-    document.querySelector('#backButton')
-        .addEventListener('click', renderLandingPage);
 
     const loginForm = document.querySelector('#loginForm');
+
+    document.querySelector('#backButton')
+        .addEventListener('click', () => {
+            if (portal === 'supplier' && returnToRegistration) {
+                showSupplierRegistration();
+            } else {
+                renderLandingPage();
+            }
+        });
+
     const message = document.querySelector('#message');
     const loginButton = document.querySelector('#loginButton');
 
@@ -400,8 +412,93 @@ function renderLoginPage(portal) {
     });
 }
 
+function showSupplierRegistration() {
+    renderSupplierRegistrationPage(
+        () => {
+            renderLoginPage('supplier');
+        },
+        () => {
+            renderLandingPage();
+        }
+    );
+}
+
+function showProcurementRegistration() {
+    renderProcurementRegistrationPage(
+        () => renderLoginPage('procurement-user'),
+        () => renderLandingPage()
+    );
+}
+
+function showSupplierActivation() {
+    renderSupplierActivationPage(
+        () => renderLoginPage('supplier')
+    );
+}
+function showProcurementActivation() {
+    renderProcurementActivationPage(
+        () => renderLoginPage('procurement-user')
+    );
+}
+
+
 // -----------------------------
 // INITIAL PAGE
 // -----------------------------
 
-renderLandingPage();
+function showActivationChoice(token) {
+    document.querySelector('#app').innerHTML = `
+        <div class="login-container supplier-registration-container">
+            <div class="login-card supplier-registration-card">
+
+                <div class="brand">
+                    <div class="brand-logo">P</div>
+                    <h1>ProcureAxis</h1>
+                    <p>ENTERPRISE PROCUREMENT PLATFORM</p>
+                </div>
+
+                <div class="welcome-section">
+                    <h2>Activate Your Account</h2>
+                    <p>Select the portal where you registered your company.</p>
+                </div>
+
+                <button id="supplier-activation-choice">
+                    Activate Supplier Account
+                </button>
+
+                <button id="procurement-activation-choice">
+                    Activate Procurement Account
+                </button>
+
+            </div>
+        </div>
+    `;
+
+    document.querySelector('#supplier-activation-choice')
+        .addEventListener('click', () => {
+            showSupplierActivation();
+            const tokenInput = document.querySelector('#activationToken');
+            if (tokenInput) tokenInput.value = token;
+        });
+
+    document.querySelector('#procurement-activation-choice')
+        .addEventListener('click', () => {
+            showProcurementActivation();
+            const tokenInput = document.querySelector('#procurementActivationToken');
+            if (tokenInput) tokenInput.value = token;
+        });
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+const activationToken = urlParams.get('token');
+const portal = urlParams.get('portal');
+
+if (portal === 'procurement-activation') {
+    showProcurementActivation();
+
+} else if (activationToken) {
+    showActivationChoice(activationToken);
+
+} else {
+    renderLandingPage();
+}

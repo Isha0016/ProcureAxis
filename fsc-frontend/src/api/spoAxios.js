@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const spoApi = axios.create({
-    baseURL: 'discerning-curiosity-production-ad1fdcd3.up.railway.app',
+    baseURL: 'https://discerning-curiosity-production-ad1fdcd3.up.railway.app',
     headers: {
         'Content-Type': 'application/json'
     }

@@ -51,3 +51,13 @@ export async function reinstateSupplierCompany(companyId) {
     );
     return response.data;
 }
+
+// Register a new supplier company
+export async function registerSupplierCompany(registrationData) {
+    const response = await api.post(
+        `${BASE_PATH}/register`,
+        registrationData
+    );
+
+    return response.data;
+}

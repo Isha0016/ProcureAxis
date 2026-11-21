@@ -66,3 +66,14 @@ export async function reinstateProcurementCompany(companyId) {
 
     return response.data;
 }
+
+// Register a new procurement company
+export async function registerProcurementCompany(registrationData) {
+    const response = await spoApi.post(
+        `${BASE_PATH}/register`,
+        registrationData
+    );
+
+    return response.data;
+}
+

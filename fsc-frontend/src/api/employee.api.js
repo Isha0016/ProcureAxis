@@ -1,4 +1,5 @@
 import api from './axios.js';
+import spoApi from './spoAxios.js';
 
 const BASE_PATH = '/api/v1/common/emp';
 
@@ -34,4 +35,19 @@ export async function activateEmployee(token, newPassword) {
     );
 
     return response.data;
+}
+// Procurement activation
+
+export async function activateProcurementEmployee(token, newPassword) {
+
+    const response = await spoApi.post(
+
+        `${BASE_PATH}/activate`,
+
+        { token, newPassword }
+
+    );
+
+    return response.data;
+
 }

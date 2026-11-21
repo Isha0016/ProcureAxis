@@ -1277,3 +1277,112 @@ tr:hover td {
   padding: 9px 18px;
   cursor: pointer;
 }
+/* =========================================
+   SUPPLIER REGISTRATION PAGE
+========================================= */
+
+.supplier-registration-container {
+  align-items: flex-start;
+  padding: 40px 20px;
+}
+
+.supplier-registration-card {
+  max-width: 760px;
+}
+
+.registration-section-title {
+  color: var(--navy);
+  font-size: 16px;
+  margin: 25px 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.supplier-registration-card .profile-grid {
+  margin-bottom: 18px;
+}
+
+.supplier-registration-footer {
+  text-align: center;
+  margin-top: 22px;
+  color: var(--muted);
+}
+
+.supplier-registration-footer a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.supplier-registration-footer a:hover {
+  text-decoration: underline;
+}
+
+#supplier-registration-message {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.success-message {
+  color: #15803d;
+}
+
+.error-message {
+  color: #dc2626;
+}
+
+/* =================================
+   PROCUREMENT REGISTRATION
+================================= */
+
+.procurement-registration-container {
+  align-items: flex-start;
+  padding: 40px 20px;
+}
+
+.procurement-registration-card {
+  max-width: 760px;
+}
+
+.registration-section-title {
+  color: var(--navy);
+  font-size: 16px;
+  margin: 25px 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.procurement-registration-card .profile-grid {
+  margin-bottom: 18px;
+}
+
+.procurement-registration-footer {
+  text-align: center;
+  margin-top: 22px;
+  color: var(--muted);
+}
+
+.procurement-registration-footer a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.procurement-registration-footer a:hover {
+  text-decoration: underline;
+}
+
+#procurement-registration-message {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.success-message {
+  color: #15803d;
+}
+
+.error-message {
+  color: #dc2626;
+}
