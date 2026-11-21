@@ -1,42 +1,50 @@
 package com.fsc.supply_chain_common_operations.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fsc.supply_chain_common_operations.enums.NotificationPriority;
 import com.fsc.supply_chain_common_operations.enums.NotificationStatus;
 import com.fsc.supply_chain_common_operations.models.Notification;
 import com.fsc.supply_chain_common_operations.models.User;
 import com.fsc.supply_chain_common_operations.repositories.NotificationRepo;
 import com.fsc.supply_chain_common_operations.utilities.SystemUtility;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
 public class EmailHandlerImpl implements NotificationHandler {
 
-    private JavaMailSender javaMailSender;
-    private NotificationRepo notificationRepo;
+    private final NotificationRepo notificationRepo;
+    private final ObjectMapper objectMapper;
+    private final HttpClient httpClient;
 
-    @Autowired
-    public EmailHandlerImpl(JavaMailSender javaMailSender,
-                            NotificationRepo notificationRepo){
-        this.javaMailSender = javaMailSender;
+    @Value("${fsc.email.apps-script-url:}")
+    private String appsScriptUrl;
+
+    @Value("${fsc.email.apps-script-api-key:}")
+    private String appsScriptApiKey;
+
+    public EmailHandlerImpl(
+            NotificationRepo notificationRepo,
+            ObjectMapper objectMapper) {
+
         this.notificationRepo = notificationRepo;
+        this.objectMapper = objectMapper;
+        this.httpClient = HttpClient.newBuilder()
+                .followRedirects(HttpClient.Redirect.ALWAYS)
+                .build();
     }
 
-    /**
-     * To Send emails we require library - JavaMailSender
-     * @param notification
-     * @return
-     */
     @Override
     public Notification send(Notification notification) {
 
@@ -51,6 +59,7 @@ public class EmailHandlerImpl implements NotificationHandler {
                 this.sendEmail(notification);
                 notification.setEmailFailed(false);
                 notification.setEmailDelivered(true);
+
                 log.info("URGENT email notification sent successfully");
 
             } else if (notification.getNotificationPriority().equals(NotificationPriority.NORMAL)
@@ -61,6 +70,7 @@ public class EmailHandlerImpl implements NotificationHandler {
                 this.sendEmail(notification);
                 notification.setEmailFailed(false);
                 notification.setEmailDelivered(true);
+
                 log.info("Queued email notification sent successfully");
 
             } else if (notification.isEmailFailed()) {
@@ -70,6 +80,7 @@ public class EmailHandlerImpl implements NotificationHandler {
                 this.sendEmail(notification);
                 notification.setEmailFailed(false);
                 notification.setEmailDelivered(true);
+
                 log.info("Email notification retry successful");
 
             } else {
@@ -83,10 +94,16 @@ public class EmailHandlerImpl implements NotificationHandler {
 
             log.error("Unable to send email notification. Error: {}", e.getMessage(), e);
 
+            String previousFailure = notification.getFailureMessage() == null
+                    ? ""
+                    : notification.getFailureMessage();
+
             notification.setFailureMessage(
-                    notification.getFailureMessage() + " [EMAIL] - " + e.getMessage()
+                    previousFailure + " [EMAIL] - " + e.getMessage()
             );
+
             notification.setEmailFailed(true);
+            notification.setEmailDelivered(false);
             notification.setNotificationStatus(NotificationStatus.FAILED);
         }
 
@@ -103,33 +120,38 @@ public class EmailHandlerImpl implements NotificationHandler {
         return notification;
     }
 
+    private void sendEmail(Notification notification) throws Exception {
 
-    private void sendEmail(Notification notification) throws MessagingException {
+        log.info("Preparing email notification through Google Apps Script");
 
-        log.info("Preparing email notification");
+        if (appsScriptUrl == null || appsScriptUrl.isBlank()
+                || appsScriptApiKey == null || appsScriptApiKey.isBlank()) {
+            throw new IllegalStateException(
+                    "Google Apps Script URL or API key is not configured"
+            );
+        }
 
-        // To Users
         List<String> toUsers = notification.getToUsers()
                 .stream()
                 .map(User::getEmailAddress)
                 .toList();
 
-        // CC Users
         List<String> ccUsers = notification.getCcUsers()
                 .stream()
                 .map(User::getEmailAddress)
                 .toList();
 
-        // BCC Users
         List<String> bccUsers = notification.getBccUsers()
                 .stream()
                 .map(User::getEmailAddress)
                 .toList();
 
-        log.info("Email recipients prepared. To={}, CC={}, BCC={}",
-                toUsers.size(), ccUsers.size(), bccUsers.size());
+        if (toUsers.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "At least one recipient email address is required"
+            );
+        }
 
-        // Email Content
         String emailBody = notification.getNotificationTemplate().getEmailTemplate();
         String subjectLine = notification.getNotificationTemplate().getSubjectLine();
 
@@ -143,27 +165,57 @@ public class EmailHandlerImpl implements NotificationHandler {
                 notification.getNotificationContext().getSubjectLineMap()
         );
 
-        log.info("Email template variables replaced successfully");
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("apiKey", appsScriptApiKey);
+        requestBody.put("to", String.join(",", toUsers));
+        requestBody.put("cc", String.join(",", ccUsers));
+        requestBody.put("bcc", String.join(",", bccUsers));
+        requestBody.put("subject", subjectLine);
+        requestBody.put("body", emailBody);
+        requestBody.put("htmlBody", true);
 
-        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        String jsonPayload = objectMapper.writeValueAsString(requestBody);
 
-        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(appsScriptUrl))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                .build();
 
-        mimeMessageHelper.setTo(toUsers.toArray(new String[0]));
-        mimeMessageHelper.setCc(ccUsers.toArray(new String[0]));
-        mimeMessageHelper.setBcc(bccUsers.toArray(new String[0]));
-        mimeMessageHelper.setSubject(subjectLine);
-        mimeMessageHelper.setText(emailBody, true);
-
-        log.info("Sending email notification");
+        log.info("Sending email through Google Apps Script. To={}, CC={}, BCC={}",
+                toUsers.size(), ccUsers.size(), bccUsers.size());
 
         RetryService.retry(() -> {
-            javaMailSender.send(mimeMessage);
+            try {
+                HttpResponse<String> response = httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString()
+                );
+
+                if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                    throw new IllegalStateException(
+                            "Google Apps Script returned HTTP status "
+                                    + response.statusCode()
+                    );
+                }
+
+                Map<?, ?> responseData = objectMapper.readValue(
+                        response.body(),
+                        Map.class
+                );
+
+                if (!Boolean.TRUE.equals(responseData.get("success"))) {
+                    throw new IllegalStateException(
+                            "Google Apps Script email failed: "
+                                    + responseData.get("message")
+                    );
+                }
+
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         });
 
-        log.info("Email notification sent successfully");
+        log.info("Google Apps Script accepted the email request successfully");
     }
-
-
-
 }
