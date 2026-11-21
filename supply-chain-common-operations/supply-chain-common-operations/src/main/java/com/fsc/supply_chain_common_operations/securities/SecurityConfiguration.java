@@ -33,7 +33,7 @@ public class SecurityConfiguration {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .cors(Customizer.withDefaults())
+
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -88,7 +88,8 @@ public class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-                List.of("https://procure-axis.vercel.app")
+                List.of("https://procure-axis.vercel.app",
+                        "https://localhost:5173")
         );
 
         configuration.setAllowedMethods(
