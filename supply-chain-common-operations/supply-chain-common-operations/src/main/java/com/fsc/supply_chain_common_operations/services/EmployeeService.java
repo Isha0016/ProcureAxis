@@ -21,7 +21,6 @@ import com.fsc.supply_chain_common_operations.utilities.SystemUtility;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,13 +48,14 @@ public class EmployeeService implements EntityService<Employee> {
     private final NotificationService notificationService;
     private final PasswordEncoder passwordEncoder;
     private final AccountActivationRepo accountActivationRepo;
-    @Value("${fsc.application.base-url:http://localhost:8083}")
-    private String applicationBaseUrl;
 
     @Autowired
     private NotificationContextRepo notificationContextRepo;
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
+    private static final String APPLICATION_LINK =
+            "https://proteorix.vercel.app";
 
     @Autowired
     public EmployeeService(
@@ -85,7 +85,8 @@ public class EmployeeService implements EntityService<Employee> {
     }
 
     // =========================================================
-    // MAIN SUPPLIER EMPLOYEE CREATION
+    // MAIN COMPANY EMPLOYEE CREATION
+    // Used for Procurement and Supplier registration
     // =========================================================
 
     @Transactional
@@ -128,8 +129,13 @@ public class EmployeeService implements EntityService<Employee> {
         // 5. Generate activation token
         String activationToken = createActivationToken(employee);
 
-        // 6. Send activation notification
-        sendActivationNotification(employee, null, activationToken);
+        // 6. Send COMPANY REGISTRATION notification
+        sendActivationNotification(
+                employee,
+                null,
+                activationToken,
+                NotificationTemplateConstant.COMPANY_REGISTRATION_TEMPLATE_ID
+        );
 
         return new MaintUserCreationResult(employee, null);
     }
@@ -216,11 +222,12 @@ public class EmployeeService implements EntityService<Employee> {
         // 7. Generate activation token
         String activationToken = createActivationToken(employee);
 
-        // 8. Send activation notification
+        // 8. Send EMPLOYEE INVITATION notification
         sendActivationNotification(
                 employee,
                 invitorEmp,
-                activationToken
+                activationToken,
+                NotificationTemplateConstant.INVITE_EMPLOYEE_TEMPLATE_ID
         );
 
         return employee;
@@ -228,13 +235,14 @@ public class EmployeeService implements EntityService<Employee> {
 
     // =========================================================
     // COMMON ACTIVATION NOTIFICATION
-    // Used for main supplier employee and invited employees
+    // Template is selected according to the registration flow
     // =========================================================
 
     private void sendActivationNotification(
             Employee employee,
             Employee inviter,
-            String activationToken
+            String activationToken,
+            UUID templateId
     ) {
 
         Company company = employee.getCompany();
@@ -259,15 +267,11 @@ public class EmployeeService implements EntityService<Employee> {
         }
 
         emailMap.put("managerName", managerName);
-        String activationUrl = applicationBaseUrl
-                + "/activate?token="
-                + java.net.URLEncoder.encode(
-                activationToken,
-                java.nio.charset.StandardCharsets.UTF_8
-        );
 
-        emailMap.put("activationUrl", activationUrl);
-        emailMap.put("activationToken",activationToken);
+        // Application link and activation token are separate
+        emailMap.put("applicationLink", APPLICATION_LINK);
+        emailMap.put("activationToken", activationToken);
+
         emailMap.put(
                 "currentYear",
                 String.valueOf(java.time.Year.now().getValue())
@@ -294,15 +298,13 @@ public class EmployeeService implements EntityService<Employee> {
         notificationContext =
                 notificationContextRepo.save(notificationContext);
 
-        // Fetch dedicated employee invitation template
+        // Fetch the template selected by the calling flow
         NotificationTemplate notificationTemplate =
-                notificationService.fetchTemplateById(
-                        NotificationTemplateConstant.INVITE_EMPLOYEE_TEMPLATE_ID
-                );
+                notificationService.fetchTemplateById(templateId);
 
         if (notificationTemplate == null) {
             throw new IllegalStateException(
-                    "Employee invitation template not found"
+                    "Notification template not found: " + templateId
             );
         }
 
