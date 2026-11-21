@@ -14,6 +14,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,9 +28,11 @@ public class EmailHandlerImpl implements NotificationHandler {
 
     @Autowired
     public EmailHandlerImpl(JavaMailSender javaMailSender,
-                            NotificationRepo notificationRepo){
+                            NotificationRepo notificationRepo,
+                            ResendEmailClient resendEmailClient){
         this.javaMailSender = javaMailSender;
         this.notificationRepo = notificationRepo;
+        this.resendEmailClient=resendEmailClient;
     }
 
     /**
@@ -145,24 +148,59 @@ public class EmailHandlerImpl implements NotificationHandler {
 
         log.info("Email template variables replaced successfully");
 
-        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        log.info("Sending email notification using provider: {}", emailProvider);
 
-        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
-
-        mimeMessageHelper.setTo(toUsers.toArray(new String[0]));
-        mimeMessageHelper.setCc(ccUsers.toArray(new String[0]));
-        mimeMessageHelper.setBcc(bccUsers.toArray(new String[0]));
-        mimeMessageHelper.setSubject(subjectLine);
-        mimeMessageHelper.setText(emailBody, true);
-
-        log.info("Sending email notification");
+        final String finalEmailBody = emailBody;
+        final String finalSubjectLine = subjectLine;
 
         RetryService.retry(() -> {
-            javaMailSender.send(mimeMessage);
+
+            if ("resend".equalsIgnoreCase(emailProvider)) {
+
+                resendEmailClient.send(
+                        toUsers,
+                        ccUsers,
+                        bccUsers,
+                        finalSubjectLine,
+                        finalEmailBody
+                );
+
+            } else {
+
+                try {
+                    MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+
+                    MimeMessageHelper mimeMessageHelper =
+                            new MimeMessageHelper(mimeMessage);
+
+                    mimeMessageHelper.setTo(toUsers.toArray(new String[0]));
+
+                    if (!ccUsers.isEmpty()) {
+                        mimeMessageHelper.setCc(ccUsers.toArray(new String[0]));
+                    }
+
+                    if (!bccUsers.isEmpty()) {
+                        mimeMessageHelper.setBcc(bccUsers.toArray(new String[0]));
+                    }
+
+                    mimeMessageHelper.setSubject(finalSubjectLine);
+                    mimeMessageHelper.setText(finalEmailBody, true);
+
+                    javaMailSender.send(mimeMessage);
+
+                } catch (MessagingException e) {
+                    throw new RuntimeException("SMTP email sending failed", e);
+                }
+            }
         });
 
         log.info("Email notification sent successfully");
     }
+
+    private ResendEmailClient resendEmailClient;
+
+    @Value("${fsc.email.provider:smtp}")
+    private String emailProvider;
 
 
 
