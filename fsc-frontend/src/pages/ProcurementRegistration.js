@@ -314,15 +314,30 @@ export function renderProcurementRegistrationPage(onSignIn, onBack) {
             activationForm.reset();
 
         } catch (error) {
-            console.error('Procurement Account Activation Failed:', error);
+            console.error('Procurement Company Registration Failed:', error);
 
-            activationMessage.textContent =
-                error.response?.data?.message ||
-                error.response?.data?.detail ||
-                error.response?.data ||
-                'Unable to activate procurement account. Please check your token and try again.';
+            // Inspect the actual backend response
+            console.log('HTTP Status:', error.response?.status);
+            console.log('Backend Error Response:', error.response?.data);
 
-            activationMessage.className = 'error-message';
+            const errorData = error.response?.data;
+
+            let errorMessage = 'Unable to register procurement company. Please try again.';
+
+            if (typeof errorData === 'string') {
+                errorMessage = errorData;
+            } else if (errorData && typeof errorData === 'object') {
+                errorMessage =
+                    errorData.message ||
+                    errorData.detail ||
+                    errorData.error ||
+                    JSON.stringify(errorData);
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+
+            message.textContent = errorMessage;
+            message.className = 'error-message';
 
         } finally {
             activationButton.disabled = false;
