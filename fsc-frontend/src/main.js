@@ -5,7 +5,7 @@ import { renderSupplierDashboard } from './pages/supplier.js';
 import { renderProcurementDashboard } from './pages/procurement.js';
 import { renderApprovalManagerDashboard } from './pages/approvalManager.js';
 import { renderInternalAdminDashboard } from "./pages/internalAdmin.js";
-import { renderSupplierRegistrationPage }from './pages/supplierRegistration.js';
+import { renderSupplierRegistrationPage }from './pages/SupplierRegistration.js';
 import { renderSupplierActivationPage} from "./pages/supplierActivation.js";
 import { renderProcurementRegistrationPage} from "./pages/ProcurementRegistration.js";
 import { renderProcurementActivationPage} from "./pages/procurementActivation.js";
