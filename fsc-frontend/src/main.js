@@ -493,7 +493,10 @@ const urlParams = new URLSearchParams(window.location.search);
 const activationToken = urlParams.get('token');
 const portal = urlParams.get('portal');
 
-if (portal === 'procurement-activation') {
+if (portal === 'supplier-activation') {
+    showSupplierActivation();
+
+} else if (portal === 'procurement-activation') {
     showProcurementActivation();
 
 } else if (activationToken) {

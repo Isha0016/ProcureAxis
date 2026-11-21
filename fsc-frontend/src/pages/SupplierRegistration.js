@@ -1,4 +1,5 @@
 import { registerSupplierCompany } from '../api/supplierCompany.api.js';
+import { activateEmployee } from '../api/employee.api.js';
 
 export function renderSupplierRegistrationPage(onSignIn, onBack) {
     document.querySelector('#app').innerHTML = `
@@ -16,6 +17,7 @@ export function renderSupplierRegistrationPage(onSignIn, onBack) {
                     <p>Submit your company details to join our supplier network.</p>
                 </div>
 
+                <!-- SUPPLIER REGISTRATION -->
                 <form id="supplier-registration-form">
 
                     <h3 class="registration-section-title">Supplier Details</h3>
@@ -136,8 +138,72 @@ export function renderSupplierRegistrationPage(onSignIn, onBack) {
                     <p id="supplier-registration-message" role="status"></p>
                 </form>
 
+                <!-- SUPPLIER ACCOUNT ACTIVATION -->
+                <div class="activation-section">
+
+                    <h3 class="registration-section-title">
+                        Activate Your Account
+                    </h3>
+
+                    <p>
+                        Enter the activation token received in your email
+                        and set your password.
+                    </p>
+
+                    <form id="supplier-activation-form">
+
+                        <div class="form-group">
+                            <label for="supplierActivationToken">
+                                Activation Token *
+                            </label>
+                            <input
+                                type="text"
+                                id="supplierActivationToken"
+                                name="activationToken"
+                                required
+                                placeholder="Paste your activation token"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="supplierNewPassword">
+                                New Password *
+                            </label>
+                            <input
+                                type="password"
+                                id="supplierNewPassword"
+                                name="newPassword"
+                                required
+                                minlength="8"
+                                placeholder="Enter new password"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="supplierConfirmPassword">
+                                Confirm Password *
+                            </label>
+                            <input
+                                type="password"
+                                id="supplierConfirmPassword"
+                                name="confirmPassword"
+                                required
+                                minlength="8"
+                                placeholder="Confirm new password"
+                            >
+                        </div>
+
+                        <button type="submit" id="supplier-activate-button">
+                            Activate Account
+                        </button>
+
+                        <p id="supplier-activation-message" role="status"></p>
+
+                    </form>
+                </div>
+
                 <div class="supplier-registration-footer">
-                    <p>Already registered? 
+                    <p>Already registered?
                         <a href="#" id="supplier-signin-link">Sign In</a>
                     </p>
                 </div>
@@ -154,6 +220,7 @@ export function renderSupplierRegistrationPage(onSignIn, onBack) {
     const message = document.querySelector('#supplier-registration-message');
     const submitButton = document.querySelector('#supplier-register-button');
 
+    // SUPPLIER REGISTRATION HANDLER
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
 
@@ -192,10 +259,12 @@ export function renderSupplierRegistrationPage(onSignIn, onBack) {
             await registerSupplierCompany(registrationData);
 
             message.textContent =
-                'Registration successful! Please check your email for the account activation link.';
+                'Registration successful! Please check your email for the activation token.';
+
             message.className = 'success-message';
 
             form.reset();
+
         } catch (error) {
             message.textContent =
                 error.response?.data?.message ||
@@ -204,17 +273,78 @@ export function renderSupplierRegistrationPage(onSignIn, onBack) {
                 'Registration failed. Please try again.';
 
             message.className = 'error-message';
+
         } finally {
             submitButton.disabled = false;
             submitButton.textContent = 'Register Supplier Company';
         }
     });
 
+    // SUPPLIER ACTIVATION HANDLER
+    const activationForm =
+        document.querySelector('#supplier-activation-form');
+
+    const activationMessage =
+        document.querySelector('#supplier-activation-message');
+
+    const activationButton =
+        document.querySelector('#supplier-activate-button');
+
+    activationForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        if (!activationForm.reportValidity()) return;
+
+        const token =
+            activationForm.elements.activationToken.value.trim();
+
+        const newPassword =
+            activationForm.elements.newPassword.value;
+
+        const confirmPassword =
+            activationForm.elements.confirmPassword.value;
+
+        if (newPassword !== confirmPassword) {
+            activationMessage.textContent = 'Passwords do not match.';
+            activationMessage.className = 'error-message';
+            return;
+        }
+
+        activationButton.disabled = true;
+        activationButton.textContent = 'Activating...';
+
+        activationMessage.textContent = '';
+        activationMessage.className = '';
+
+        try {
+            await activateEmployee(token, newPassword);
+
+            activationMessage.textContent =
+                'Supplier account activated successfully! You can now sign in.';
+
+            activationMessage.className = 'success-message';
+
+            activationForm.reset();
+
+        } catch (error) {
+            activationMessage.textContent =
+                error.response?.data?.message ||
+                error.response?.data?.error ||
+                error.message ||
+                'Account activation failed. Please try again.';
+
+            activationMessage.className = 'error-message';
+
+        } finally {
+            activationButton.disabled = false;
+            activationButton.textContent = 'Activate Account';
+        }
+    });
+
+    // SIGN IN
     document.querySelector('#supplier-signin-link')
         .addEventListener('click', (event) => {
             event.preventDefault();
-
-            console.log('Supplier Sign In clicked');
 
             if (typeof onSignIn === 'function') {
                 onSignIn();
@@ -223,6 +353,7 @@ export function renderSupplierRegistrationPage(onSignIn, onBack) {
             }
         });
 
+    // BACK TO PORTAL SELECTION
     document.querySelector('#supplier-registration-back')
         .addEventListener('click', () => {
             onBack();

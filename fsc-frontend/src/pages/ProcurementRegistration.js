@@ -1,4 +1,5 @@
 import { registerProcurementCompany } from '../api/procurementCompany.api.js';
+import { activateProcurementEmployee } from '../api/employee.api.js';
 
 export function renderProcurementRegistrationPage(onSignIn, onBack) {
     document.querySelector('#app').innerHTML = `
@@ -137,6 +138,56 @@ export function renderProcurementRegistrationPage(onSignIn, onBack) {
 
                 </form>
 
+                <div class="activation-section">
+                    <h3 class="registration-section-title">Activate Your Procurement Account</h3>
+                    <p>Already received your activation token by email? Enter it below to activate your account.</p>
+
+                    <form id="procurement-activation-form">
+
+                        <div class="form-group">
+                            <label for="procurementActivationToken">Activation Token *</label>
+                            <input
+                                type="text"
+                                id="procurementActivationToken"
+                                name="activationToken"
+                                placeholder="Enter activation token"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="procurementNewPassword">New Password *</label>
+                            <input
+                                type="password"
+                                id="procurementNewPassword"
+                                name="newPassword"
+                                placeholder="Enter new password"
+                                required
+                                minlength="8"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="procurementConfirmPassword">Confirm Password *</label>
+                            <input
+                                type="password"
+                                id="procurementConfirmPassword"
+                                name="confirmPassword"
+                                placeholder="Confirm new password"
+                                required
+                                minlength="8"
+                            >
+                        </div>
+
+                        <button type="submit" id="procurement-activate-button">
+                            Activate Account
+                        </button>
+
+                        <p id="procurement-activation-message" role="status"></p>
+
+                    </form>
+                </div>
+
                 <div class="supplier-registration-footer">
                     <p>Already registered?
                         <a href="#" id="procurement-signin-link">Sign In</a>
@@ -158,6 +209,10 @@ export function renderProcurementRegistrationPage(onSignIn, onBack) {
     const message = document.querySelector('#procurement-registration-message');
     const button = document.querySelector('#procurement-register-button');
 
+    const activationForm = document.querySelector('#procurement-activation-form');
+    const activationMessage = document.querySelector('#procurement-activation-message');
+    const activationButton = document.querySelector('#procurement-activate-button');
+
     document.querySelector('#procurement-signin-link')
         .addEventListener('click', event => {
             event.preventDefault();
@@ -169,6 +224,7 @@ export function renderProcurementRegistrationPage(onSignIn, onBack) {
             if (typeof onBack === 'function') onBack();
         });
 
+    // Procurement company registration
     form.addEventListener('submit', async event => {
         event.preventDefault();
 
@@ -201,21 +257,11 @@ export function renderProcurementRegistrationPage(onSignIn, onBack) {
 
             console.log('Procurement Company Registration Response:', response);
 
-            message.innerHTML = `
-                <p>Company registered successfully!</p>
-                <p>Please check your email for the activation token.</p>
-                <button type="button" id="go-to-procurement-activation">
-                    Activate Your Account
-                </button>
-            `;
+            message.textContent =
+                'Company registered successfully! Please check your email for the activation token.';
 
             message.className = 'success-message';
             form.reset();
-
-            document.querySelector('#go-to-procurement-activation')
-                .addEventListener('click', () => {
-                    window.location.href = '/?portal=procurement-activation';
-                });
 
         } catch (error) {
             console.error('Procurement Company Registration Failed:', error);
@@ -231,6 +277,56 @@ export function renderProcurementRegistrationPage(onSignIn, onBack) {
         } finally {
             button.disabled = false;
             button.textContent = 'Register Company';
+        }
+    });
+
+    // Procurement employee account activation
+    activationForm.addEventListener('submit', async event => {
+        event.preventDefault();
+
+        if (!activationForm.reportValidity()) return;
+
+        const formData = new FormData(activationForm);
+
+        const token = formData.get('activationToken').trim();
+        const newPassword = formData.get('newPassword');
+        const confirmPassword = formData.get('confirmPassword');
+
+        activationMessage.textContent = '';
+        activationMessage.className = '';
+
+        if (newPassword !== confirmPassword) {
+            activationMessage.textContent = 'New password and confirm password do not match.';
+            activationMessage.className = 'error-message';
+            return;
+        }
+
+        activationButton.disabled = true;
+        activationButton.textContent = 'Activating...';
+
+        try {
+            await activateProcurementEmployee(token, newPassword);
+
+            activationMessage.textContent =
+                'Procurement account activated successfully! You can now sign in.';
+
+            activationMessage.className = 'success-message';
+            activationForm.reset();
+
+        } catch (error) {
+            console.error('Procurement Account Activation Failed:', error);
+
+            activationMessage.textContent =
+                error.response?.data?.message ||
+                error.response?.data?.detail ||
+                error.response?.data ||
+                'Unable to activate procurement account. Please check your token and try again.';
+
+            activationMessage.className = 'error-message';
+
+        } finally {
+            activationButton.disabled = false;
+            activationButton.textContent = 'Activate Account';
         }
     });
 }
