@@ -35,11 +35,10 @@ public class EmailHandlerImpl implements NotificationHandler {
     private String appsScriptApiKey;
 
     public EmailHandlerImpl(
-            NotificationRepo notificationRepo,
-            ObjectMapper objectMapper) {
+            NotificationRepo notificationRepo) {
 
         this.notificationRepo = notificationRepo;
-        this.objectMapper = objectMapper;
+        this.objectMapper = new ObjectMapper();
         this.httpClient = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .build();
