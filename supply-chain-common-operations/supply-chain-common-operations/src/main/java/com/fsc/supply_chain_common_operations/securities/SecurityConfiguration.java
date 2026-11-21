@@ -91,7 +91,7 @@ public class SecurityConfiguration {
 
         configuration.setAllowedOrigins(
                 List.of("https://procure-axis.vercel.app",
-                        "https://localhost:5173")
+                        "http://localhost:5173")
         );
 
         configuration.setAllowedMethods(
