@@ -18,6 +18,7 @@ The system supports the procurement lifecycle, from organization onboarding and 
 - Supplier account activation and approval workflows.
 - Supplier status management, including suspension and deactivation.
 - Supplier product and product-category management.
+- AI-assisted supplier feedback generation using Google Gemini.
 
 ### 2. 🛒 Procurement Management
 - Procurement company registration and management.
@@ -49,36 +50,134 @@ The system supports the procurement lifecycle, from organization onboarding and 
 ### 7. 📧 Notifications & Communication
 - Shared notification functionality.
 - Email-related operations for platform workflows.
+- Reusable communication functionality across backend modules.
+
+### 8. 🤖 AI-Powered Supplier Feedback
+- Google Gemini API integration through a dedicated `GeminiClient`.
+- Supplier feedback generation based on company information.
+- Feedback covering supplier strengths, weaknesses, potential risks, and improvement areas.
+- Storage of generated feedback in the supplier company's `aiFeedback` field.
+- Error handling to allow supplier registration to continue if AI feedback generation fails.
 
 ## 🏗️ System Architecture
 
-ProcureAxis follows a modular backend architecture that separates supplier lifecycle management, sourcing and procurement operations, and shared business functionality.
+ProcureAxis follows a modular, layered backend architecture that separates supplier lifecycle management, sourcing and procurement operations, and shared business functionality.
 
-The frontend communicates with the backend services through REST APIs, while the Common Operations module provides reusable functionality across the backend modules.
+The frontend communicates with backend services through REST APIs. The Supplier Lifecycle Operations (SLO) and Sourcing and Procurement Operations (SPO) modules use reusable components provided by Common Operations.
+
+### 🧭 Complete ProcureAxis Architecture
 
 ```mermaid
-flowchart TD
-    U[Platform Users] --> FE[Frontend - Vite / JavaScript]
+flowchart TB
+    subgraph USERS["Platform Users"]
+        SUP["Supplier"]
+        PROC["Procurement User"]
+        AM["Approval Manager"]
+        ADMIN["Internal Admin"]
+    end
 
-    FE --> SLO[Supplier Lifecycle Operations - SLO]
-    FE --> SPO[Sourcing and Procurement Operations - SPO]
+    subgraph FRONTEND["Frontend Layer - Vite / JavaScript"]
+        UI["ProcureAxis Web Application"]
+        AXIOS["Axios API Integration"]
+        AUTH["JWT Token Handling"]
 
-    SLO --> COMMON[Common Operations]
+        UI --> AXIOS
+        AXIOS --> AUTH
+    end
+
+    subgraph BACKEND["Backend Layer - Spring Boot"]
+        subgraph SLO["Supplier Lifecycle Operations - SLO"]
+            SLO_C["Supplier Controllers"]
+            SLO_S["Supplier Services"]
+            SLO_P["Products & Categories"]
+            SLO_C --> SLO_S
+            SLO_S --> SLO_P
+        end
+
+        subgraph SPO["Sourcing & Procurement Operations - SPO"]
+            SPO_C["Procurement Controllers"]
+            SPO_S["Procurement Services"]
+            SPO_P["Purchase Requests"]
+            SPO_SR["Sourcing Requests"]
+            SPO_B["Bids & Awards"]
+
+            SPO_C --> SPO_S
+            SPO_S --> SPO_P
+            SPO_S --> SPO_SR
+            SPO_SR --> SPO_B
+        end
+
+        subgraph COMMON["Common Operations - Shared Module"]
+            SECURITY["Spring Security & JWT"]
+            USER["User & Employee Management"]
+            ROLE["Roles & Permissions"]
+            COMPANY["Common Company Models"]
+            NOTIFY["Notification Services"]
+            EMAIL["Email Handler"]
+            GEMINI_CLIENT["Gemini API Client"]
+
+            SECURITY --> USER
+            USER --> ROLE
+        end
+    end
+
+    subgraph DATABASE["Database Layer"]
+        DB[("PostgreSQL Database")]
+    end
+
+    subgraph EXTERNAL["External Integrations"]
+        GEMINI["Google Gemini API"]
+        MAIL["Email / SMTP Service"]
+    end
+
+    SUP --> UI
+    PROC --> UI
+    AM --> UI
+    ADMIN --> UI
+
+    AUTH --> SLO_C
+    AUTH --> SPO_C
+
+    SLO --> COMMON
     SPO --> COMMON
 
-    SLO --> DB[(PostgreSQL)]
-    SPO --> DB
+    SLO_S --> DB
+    SPO_S --> DB
+    COMMON --> DB
+
+    SLO_S --> GEMINI_CLIENT
+    GEMINI_CLIENT --> GEMINI
+
+    EMAIL --> MAIL
+
+    style USERS fill:#e8f1ff,stroke:#2563eb,color:#172554
+    style FRONTEND fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e
+    style BACKEND fill:#f1f5f9,stroke:#475569,color:#0f172a
+    style DATABASE fill:#dcfce7,stroke:#16a34a,color:#14532d
+    style EXTERNAL fill:#fef3c7,stroke:#d97706,color:#78350f
 ```
 
 ### 🔧 Architecture Components
 
 - **Frontend:** Provides dedicated interfaces for procurement users, suppliers, approval managers, and internal administrators.
-- **Supplier Lifecycle Operations (SLO):** Handles supplier onboarding, lifecycle management, products, and product categories.
+- **Supplier Lifecycle Operations (SLO):** Handles supplier onboarding, lifecycle management, products, product categories, and supplier-related operations.
 - **Sourcing and Procurement Operations (SPO):** Handles purchase requests, sourcing activities, supplier invitations, bids, evaluations, and awards.
-- **Common Operations:** Provides shared authentication, employee, role, permission, and other common functionality.
+- **Common Operations:** Provides shared authentication, employee, role, permission, notification, email, and other common functionality.
 - **PostgreSQL:** Provides persistent storage for application data.
+- **Google Gemini API:** Supports AI-based supplier feedback generation through the Gemini client.
 
 The modular design promotes separation of responsibilities, code reuse, and maintainability across business operations.
+
+### 🔄 Service Interaction
+
+1. Users interact with the application through the Vite frontend.
+2. The frontend sends HTTP requests to the relevant backend service.
+3. Spring Security validates authentication and authorization.
+4. Controllers receive requests and delegate business operations to service classes.
+5. Service classes execute business logic and interact with repositories.
+6. Repositories use Spring Data JPA and Hibernate to access PostgreSQL.
+7. SLO and SPO reuse shared functionality from Common Operations.
+8. External integrations, such as Gemini and email services, are used by the relevant business workflows.
 
 ## 💻 Technology Stack
 
@@ -92,16 +191,19 @@ The modular design promotes separation of responsibilities, code reuse, and main
 | ORM | Spring Data JPA, Hibernate | Database interaction and persistence |
 | Database | PostgreSQL | Relational data storage |
 | Database Migration | Flyway | Version-controlled database migrations |
+| AI Integration | Google Gemini API | AI-assisted supplier feedback |
 | Build Management | Maven | Backend dependency and build management |
 | API Testing | Postman | API testing and workflow validation |
 | Database Administration | pgAdmin | Database inspection and management |
 
 ## 📁 Project Structure
 
-The repository is organized into independent frontend and backend modules, along with API testing resources and deployment configurations.
+The repository is organized into independent frontend and backend modules, along with screenshots, API testing resources, and deployment configurations.
 
 ```text
-fsc-dev/
+ProcureAxis/
+│
+├── screenshots/
 │
 ├── fsc-frontend/
 │   ├── src/
@@ -115,16 +217,25 @@ fsc-dev/
 ├── supply-chain-common-operations/
 │   └── supply-chain-common-operations/
 │       ├── src/
+│       │   └── main/
+│       │       ├── java/
+│       │       └── resources/
 │       ├── pom.xml
 │       └── mvnw
 │
 ├── supplier-lifecycle-operations/
 │   ├── src/
+│   │   └── main/
+│   │       ├── java/
+│   │       └── resources/
 │   ├── pom.xml
 │   └── mvnw
 │
 ├── sourcing-and-procurement-operations/
 │   ├── src/
+│   │   └── main/
+│   │       ├── java/
+│   │       └── resources/
 │   ├── pom.xml
 │   └── mvnw
 │
@@ -134,11 +245,13 @@ fsc-dev/
 │
 ├── Dockerfile
 ├── Dockerfile.spo
+├── README.md
 └── .gitignore
 ```
 
 ### 🗂️ Directory Responsibilities
 
+- **screenshots:** Contains application screenshots used in the project documentation.
 - **fsc-frontend:** Contains the web application, user interfaces, page components, and API integration.
 - **supply-chain-common-operations:** Contains shared backend functionality consumed by the business modules.
 - **supplier-lifecycle-operations:** Contains supplier onboarding and lifecycle management functionality.
@@ -146,13 +259,61 @@ fsc-dev/
 - **postman:** Contains the API collection and supporting sanitization script for API testing.
 - **Dockerfiles:** Provide containerization configurations for backend deployment.
 
+## ⚙️ Backend Architecture & Layers
+
+The backend follows a layered architecture. Each layer has a defined responsibility, helping separate HTTP request handling, business logic, data transformation, and database operations.
+
+### 🧱 Backend Request Flow
+
+```mermaid
+flowchart TD
+    A[Frontend / API Client] --> B[Controller Layer]
+    B --> C[Request DTO]
+    C --> D[Service Layer]
+    D --> E[Transformer Layer]
+    E --> F[Model / Entity Layer]
+    D --> G[Repository Layer]
+    G --> H[(PostgreSQL Database)]
+
+    H --> G
+    G --> D
+    D --> E
+    E --> I[Response DTO]
+    I --> B
+    B --> J[API Response]
+```
+
+### 📦 Main Backend Layers
+
+| Layer | Responsibility |
+|---|---|
+| Controllers | Expose REST endpoints and handle incoming HTTP requests. |
+| DTOs | Define request and response data structures exchanged through APIs. |
+| Services | Contain business logic and coordinate application operations. |
+| Repositories | Perform database access through Spring Data JPA. |
+| Transformers | Convert between request/response DTOs and application models. |
+| Models / Entities | Represent business objects and database entities. |
+| Security | Handle authentication, JWT validation, and authorization. |
+| Clients | Integrate with external services and APIs. |
+| Configuration | Defines application, security, and infrastructure configuration. |
+
+### 🔁 How the Layers Work Together
+
+1. A user performs an action in the frontend.
+2. Axios sends the request to the relevant REST controller.
+3. The controller receives the request and passes the required data to the service.
+4. The service validates the request and applies business rules.
+5. Transformers help convert between DTOs and model objects where required.
+6. Repositories communicate with the database.
+7. The service prepares the result and the controller returns the API response.
+
 ## ⚙️ Backend Modules
 
 The backend is divided into three modules, each responsible for a distinct area of the supply chain management system.
 
 ### 1. 🔗 Common Operations
 
-A shared backend module that provides reusable services, security components, and data models consumed by the business modules.
+**Purpose:** A shared backend module that provides reusable services, security components, models, and repositories consumed by the business modules.
 
 **Key Responsibilities:**
 - JWT-based authentication and security configuration.
@@ -161,10 +322,36 @@ A shared backend module that provides reusable services, security components, an
 - Shared company and business entities.
 - Email and notification handling.
 - Common repositories, services, and utilities.
+- External API client integrations.
+
+**Important Packages:**
+
+| Package | Responsibility |
+|---|---|
+| `clients` | External API integrations, including the Gemini client. |
+| `controllers` | Shared REST controller functionality. |
+| `models` | Shared business entities such as User, Employee, Company, Role, and Notification. |
+| `repositories` | Shared database access interfaces. |
+| `services` | Authentication, employee, role, notification, email, and other shared business services. |
+| `transformers` | Shared entity transformation functionality. |
+| `securities` | Authentication, authorization, and security configuration. |
+
+**Examples of shared components:**
+- `AuthService`
+- `EmployeeService`
+- `RoleService`
+- `NotificationService`
+- `EmailHandlerImpl`
+- `GeminiClient`
+- `User`
+- `Employee`
+- `Company`
+- `Role`
+- `Notification`
 
 ### 2. 🏭 Supplier Lifecycle Operations (SLO)
 
-Responsible for supplier organization management and supplier-related business operations.
+**Purpose:** Responsible for supplier organization management and supplier-related business operations.
 
 **Key Responsibilities:**
 - Supplier company registration and management.
@@ -172,10 +359,33 @@ Responsible for supplier organization management and supplier-related business o
 - Supplier approval, rejection, suspension, and deactivation.
 - Product-category management.
 - Product creation and management.
+- AI-assisted supplier feedback generation.
+
+**Important Packages:**
+
+| Package | Responsibility |
+|---|---|
+| `controllers` | Supplier company, product, and product-category REST endpoints. |
+| `services` | Supplier company, product, and product-category business logic. |
+| `transformers` | Conversion between request/response DTOs and models. |
+| `repositories` | Database operations through shared and module-specific repositories. |
+| `models` | Supplier lifecycle domain models and inherited shared entities. |
+| `dto` | Request and response data structures. |
+
+**Examples of SLO components:**
+- `SupplierCompanyController`
+- `ProductController`
+- `ProductCategoryController`
+- `SupplierCompanyService`
+- `ProductService`
+- `ProductCategoryService`
+- `ProductTransformer`
+- `ProductCategoryTransformer`
+- `RequestTransformer`
 
 ### 3. 🛒 Sourcing and Procurement Operations (SPO)
 
-Responsible for procurement processes and the end-to-end sourcing lifecycle.
+**Purpose:** Responsible for procurement processes and the end-to-end sourcing lifecycle.
 
 **Key Responsibilities:**
 - Procurement company registration and management.
@@ -186,7 +396,85 @@ Responsible for procurement processes and the end-to-end sourcing lifecycle.
 - Bid comparison and evaluation.
 - Sourcing award management.
 
-**Module Integration:** SLO and SPO reuse shared functionality from Common Operations, promoting consistency, code reuse, and separation of business responsibilities.
+**Important Packages:**
+
+| Package | Responsibility |
+|---|---|
+| `controllers` | REST endpoints for procurement and sourcing operations. |
+| `services` | Procurement, purchase request, sourcing request, and bid business logic. |
+| `repositories` | Database access for purchase requests, sourcing requests, invitations, and related records. |
+| `models` | Shared and module-specific business entities. |
+| `dto` | API request and response structures. |
+| `transformers` | Data conversion where implemented. |
+
+**Examples of SPO components:**
+- `ProcurementCompanyService`
+- `PurchaseRequestService`
+- `SourcingRequestService`
+- `BidService`
+- `PurchaseRequestRepo`
+- `SourcingRequestRepo`
+- `SourcingSupplierInvitationRepo`
+
+### 🔗 Module Integration
+
+SLO and SPO reuse shared functionality from Common Operations.
+
+This allows the application to maintain common authentication, user management, company information, notifications, and other reusable capabilities without duplicating the same business functionality across modules.
+
+## 🤖 AI Integration – Google Gemini
+
+ProcureAxis integrates Google's Gemini API to support AI-assisted supplier feedback generation.
+
+### 🧠 AI Integration Architecture
+
+```mermaid
+flowchart TD
+    A[Supplier Registration] --> B[SupplierCompanyService]
+    B --> C[Supplier Feedback Generation Method]
+    C --> D[GeminiClient - Common Operations]
+    D --> E[Google Gemini API]
+    E --> F[AI-Generated Feedback]
+    F --> G[Supplier Company aiFeedback Field]
+    G --> H[(PostgreSQL)]
+```
+
+### 🔧 Implementation Components
+
+| Component | Module | Responsibility |
+|---|---|---|
+| `SupplierCompanyService` | SLO | Initiates supplier feedback generation during supplier registration. |
+| `getSupplierCompanyFeedback()` | SLO | Prepares the supplier analysis prompt and requests AI feedback. |
+| `GeminiClient` | Common Operations | Communicates with the Google Gemini API. |
+| `Company` model | Common Operations | Contains the `aiFeedback` field for storing feedback. |
+
+### ✨ AI Feedback Capabilities
+
+The supplier feedback prompt is designed to request constructive analysis covering:
+
+- Supplier strengths.
+- Potential weaknesses.
+- Business and operational risks.
+- Overall supplier assessment.
+- Areas for improvement.
+
+### 🔐 API Configuration
+
+The Gemini API key is read through an environment variable:
+
+```text
+GEMINI_API_KEY
+```
+
+The API key must be configured in the environment where the SLO application runs.
+
+**Security:** Never hardcode or commit the Gemini API key to the repository.
+
+### 🛡️ Error Handling
+
+Supplier feedback generation is protected by exception handling. If the Gemini API request fails, the application logs the failure and continues the supplier registration process.
+
+AI feedback is an assistive feature and should not replace the platform's supplier approval and administrative decision-making workflows.
 
 ## 🖥️ Frontend Architecture
 
@@ -237,6 +525,7 @@ ProcureAxis supports structured business workflows that connect procurement orga
 3. Internal administrators review the supplier application.
 4. The supplier is approved, rejected, or moved through the applicable lifecycle actions.
 5. Approved suppliers can manage their products and participate in sourcing activities.
+6. Supplier feedback generation can be initiated through the Gemini integration.
 
 ### 2. 🛒 Procurement Workflow
 
@@ -350,6 +639,49 @@ The backend uses Spring Data JPA and Hibernate for object-relational mapping (OR
 - **Hibernate:** ORM framework for entity mapping and persistence.
 - **Flyway:** Database schema migration and version management.
 
+### 📊 Main Database Entities
+
+The shared domain model includes entities representing the main business areas of the platform.
+
+| Entity / Model | Responsibility |
+|---|---|
+| `Company` | Common company information and shared company attributes. |
+| `SupplierCompany` | Supplier organization information. |
+| `ProcurementCompany` | Procurement organization information. |
+| `User` | User account and authentication-related information. |
+| `Employee` | Employee and organization membership information. |
+| `Role` | Role information used for access management. |
+| `Product` | Supplier product information. |
+| `ProductCategory` | Product classification. |
+| `PurchaseRequest` | Procurement purchase request information. |
+| `PurchaseRequestLine` | Individual lines belonging to purchase requests. |
+| `PurchaseRequestDecision` | Purchase request approval decision records. |
+| `SourcingRequest` | Sourcing event information. |
+| `SourcingRequestLine` | Individual sourcing request lines. |
+| `SourcingRequestDecision` | Sourcing approval decision records. |
+| `SourcingSupplierInvitation` | Supplier invitations for sourcing opportunities. |
+| `Bid` | Supplier bid information. |
+| `BidLine` | Individual bid line information. |
+| `SourcingAward` | Sourcing award information. |
+| `Notification` | Application notification records. |
+| `NotificationTemplate` | Notification template information. |
+| `Operation` | Shared operation and permission-related information. |
+
+### 🔗 Database Relationship Overview
+
+The database supports relationships across the procurement lifecycle:
+
+- Companies are associated with their users and employees.
+- Suppliers manage products and product categories.
+- Procurement organizations create purchase requests and request lines.
+- Purchase requests can be used to create sourcing requests.
+- Sourcing requests contain sourcing lines and supplier invitations.
+- Suppliers submit bids containing bid lines.
+- Bid evaluation can lead to sourcing award records.
+- Shared notification and operation records support platform workflows.
+
+The exact foreign-key constraints and relationship cardinalities are defined by the application's entity mappings and database migrations.
+
 ### 📦 Persistence Responsibilities
 
 The database supports the storage and management of:
@@ -361,6 +693,7 @@ The database supports the storage and management of:
 - Sourcing requests and supplier invitations.
 - Supplier bids and sourcing awards.
 - Application-related operational records.
+- AI-generated supplier feedback.
 
 ### 🛠️ Database Management
 
@@ -399,7 +732,7 @@ Follow these steps to set up ProcureAxis in a local development environment.
 
 ```bash
 git clone https://github.com/Isha0016/ProcureAxis.git
-cd fsc-dev
+cd ProcureAxis
 ```
 
 ### 2. 🔗 Build Common Operations
@@ -465,6 +798,7 @@ Ensure the following settings are configured correctly:
 - **Email Service:** SMTP host, port, sender details, and credentials.
 - **Application Ports:** Configure the appropriate port for each backend service.
 - **Frontend API URLs:** Configure the frontend to communicate with the correct backend endpoints.
+- **Gemini API:** Configure `GEMINI_API_KEY` for AI-assisted supplier feedback generation.
 
 ### 🔒 Security Considerations
 
@@ -540,7 +874,7 @@ ProcureAxis supports deployment of its frontend and backend components as separa
 - Configure frontend and backend environment variables for the production environment.
 - Update frontend API base URLs to point to the deployed backend services.
 - Configure production database connection properties.
-- Secure JWT signing secrets and email credentials using deployment environment variables.
+- Secure JWT signing secrets, email credentials, and Gemini API keys using deployment environment variables.
 - Configure CORS to allow requests from the deployed frontend domain.
 - Verify database migrations and service connectivity before releasing updates.
 
@@ -553,11 +887,12 @@ Before deployment, ensure that:
 - Database connectivity and migrations are verified.
 - Authentication and authorization work correctly.
 - API endpoints are accessible from the deployed frontend.
+- Gemini API configuration is available to the SLO service.
 - Sensitive configuration values are not exposed in the repository.
 
 ## 📸 Application Screenshots
 
-The following screenshots showcase the ProcureAxis user interface and its key application modules.
+The following screenshots showcase the ProcureAxis user interface and its key application modules. All images are stored in the root-level `screenshots/` directory.
 
 ### 1. 🏠 Landing Page
 
