@@ -55,7 +55,7 @@ public class EmployeeService implements EntityService<Employee> {
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private static final String APPLICATION_LINK =
-            "https://proteorix.vercel.app";
+            "https://procure-axis.vercel.app";
 
     @Autowired
     public EmployeeService(
