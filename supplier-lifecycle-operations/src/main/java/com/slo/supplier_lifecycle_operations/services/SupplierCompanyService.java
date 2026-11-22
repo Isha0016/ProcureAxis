@@ -89,7 +89,7 @@ public class SupplierCompanyService {
         );
 
         // 4. Generate AI feedback
-        String feedback = null;
+        String feedback = getSupplierCompanyFeedback(supplierCompany);
 
         // 5. Save supplier company
         supplierCompany = saveOrUpdate(supplierCompany);
